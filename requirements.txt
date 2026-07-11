@@ -1,0 +1,9 @@
+﻿pytest
+typer
+rich
+pydantic
+networkx
+fastapi
+uvicorn
+python-dotenv
+pyyaml

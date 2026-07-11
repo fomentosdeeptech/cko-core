@@ -1,0 +1,83 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# VS Code
+.vscode/
+
+# JetBrains
+.idea/
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Arquivos temporÃ¡rios
+*.tmp
+*.temp
+*.bak
+*.old
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/*.log
+
+# Credenciais e segredos
+.env
+.env.*
+*.pem
+*.key
+secrets/
+credentials/
+
+# Office temporÃ¡rio
+~$*.docx
+~$*.xlsx
+~$*.pptx
+
+# Compactados
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+
+# Bancos e caches locais
+*.db
+*.sqlite
+*.sqlite3
+.cache/
+
+# Node
+node_modules/
+
+# Build
+dist/
+build/
+coverage/
+htmlcov/
+
+# Google Drive
+*.gdoc
+*.gsheet
+*.gslides
+
+# Arquivos grandes e binÃ¡rios
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.iso

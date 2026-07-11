@@ -1,0 +1,5 @@
+﻿[project]
+name="cko"
+version="0.1.0"
+description="Corporate Knowledge Organizer"
+requires-python=">=3.11"
