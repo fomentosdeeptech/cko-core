@@ -1,0 +1,17 @@
+"""Version and identity constants for the provenance statement foundation."""
+
+from uuid import UUID
+
+
+PROVENANCE_SCHEMA_VERSION = "1.0"
+PROVENANCE_SERIALIZATION_VERSION = "1.0"
+PROVENANCE_UUID_NAMESPACE = UUID("84c43be6-4bb5-52a8-9582-a2e8b04d797c")
+PROVENANCE_VERSION = "1.0.0"
+
+
+__all__ = [
+    "PROVENANCE_SCHEMA_VERSION",
+    "PROVENANCE_SERIALIZATION_VERSION",
+    "PROVENANCE_UUID_NAMESPACE",
+    "PROVENANCE_VERSION",
+]
