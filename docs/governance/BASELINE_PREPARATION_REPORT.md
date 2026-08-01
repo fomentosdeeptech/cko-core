@@ -1,5 +1,7 @@
 # Relatório de Preparação da Baseline
 
+> **Status do documento — registro histórico:** este relatório representa exclusivamente uma fotografia da fase de preparação, anterior à publicação da baseline. A baseline foi posteriormente consolidada no HEAD `87d3e2ad46dd9820b16b22cbbf62683f2a545305`. Portanto, as observações abaixo não descrevem o estado atual da plataforma; o documento permanece preservado apenas como registro histórico de auditoria.
+
 ## Resumo da auditoria
 
 A auditoria foi realizada exclusivamente por inspeção do estado Git do repositório do projeto CKO, sem executar operações de staging, commit, push, merge, checkout ou restore.
