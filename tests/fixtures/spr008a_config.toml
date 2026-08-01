@@ -1,0 +1,6 @@
+[cko]
+environment = "test"
+log_level = "warning"
+service_name = "fixture"
+timeout_seconds = 15
+

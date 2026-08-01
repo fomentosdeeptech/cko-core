@@ -1,0 +1,9 @@
+{
+  "sprint": "CKO-CORE-SPR-006A",
+  "title": "SQLite, Migrações e Versionamento do Schema",
+  "mode": "incremental_additive",
+  "database": "runtime/database/cko_canonical.db",
+  "inventory_import": false,
+  "scanner_execution": false,
+  "overwrite_existing": false
+}

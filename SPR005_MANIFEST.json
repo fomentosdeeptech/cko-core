@@ -1,0 +1,27 @@
+{
+  "sprint": "CKO-CORE-SPR-005",
+  "package": "definitiva",
+  "mode": "incremental_additive",
+  "baseline_source": "ARQUITETURA_ATUAL.txt",
+  "protected": [
+    "src/main.py",
+    "src/cko/scanner",
+    "src/cko/metadata",
+    "src/cko/kb",
+    "src/cko/classifier",
+    "src/cko/organizer",
+    "src/cko/utils",
+    "runtime/cko.db",
+    "runtime/database/cko.db",
+    "logs/spr004_inventory.json",
+    "runtime/checkpoints/spr004_checkpoint.json"
+  ],
+  "operations": {
+    "overwrite_existing": false,
+    "move": false,
+    "rename": false,
+    "delete_existing": false,
+    "database_write": false,
+    "scanner_execution": false
+  }
+}

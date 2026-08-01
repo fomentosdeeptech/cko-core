@@ -4,6 +4,7 @@ __pycache__/
 *.pyo
 *.pyd
 .pytest_cache/
+.pytest_tmp/
 .mypy_cache/
 .ruff_cache/
 
@@ -13,7 +14,7 @@ venv/
 env/
 
 # VS Code
-.vscode/
+.vscode/settings.json
 
 # JetBrains
 .idea/
@@ -30,10 +31,19 @@ $RECYCLE.BIN/
 *.old
 *.swp
 *.swo
-
-# Logs
 *.log
-logs/*.log
+
+# DiretÃ³rios operacionais e temporÃ¡rios
+/runtime/
+logs/
+reports/*.json
+reports/*.log
+reports/*.csv
+reports/tmp/
+BACKUP/
+TEMP/
+CHECKPOINTS/runtime/
+CHECKPOINTS/tmp/
 
 # Credenciais e segredos
 .env
@@ -59,6 +69,8 @@ credentials/
 *.db
 *.sqlite
 *.sqlite3
+*.db-wal
+*.db-shm
 .cache/
 
 # Node
