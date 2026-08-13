@@ -1,24 +1,34 @@
 # CKO — RFC-002 — Federated Catalog Protocol
 
 **Processo:** CKO — RFC-002 — Federated Catalog Protocol
-**Status:** proposta para aprovação
+**Status:** APPROVED WITH CONDITIONS / HUMAN-RATIFIED / ACTIVE
 **Natureza:** especificação técnica exclusivamente documental
-**Versão:** 1.0-draft
+**Versão:** 1.0
 **Ciclo:** Ciclo Arquitetural II
 **Data:** 02/08/2026
+**Ratificação humana:** 12/08/2026
+**Registro da decisão:** REV-002 — RFC-002 Architectural Decision Review
+**Condições vinculantes:** COND-001, COND-002, COND-003, COND-004 e COND-005
 **Decisão de origem:** ADR-006 — Federated Catalog Authority, aceito
 **Arquitetura de origem:** CKO-ARCH-002 — Ecosystem Evolution Architecture
 **Programa:** CKO — GOV-002 — Cycle II Execution Program
 **Baseline protegida:** CKO-BASELINE-2026.07
 **SDK protegido:** `cko` 1.0.0
 **API pública protegida:** 646 exports raiz, únicos e resolvidos
-**Implementação:** não autorizada
-**Sprint:** não criada, nomeada ou reservada
+**Implementação:** não autorizada pela aprovação desta RFC
+**SPR-018:** OPEN ADMINISTRATIVELY / TECHNICAL IMPLEMENTATION BLOCKED
 
 > Esta RFC especifica o protocolo lógico do Catálogo Federado Institucional
 > instituído pelo ADR-006. Não implementa código, não cria contratos no SDK, não
 > altera a API pública, não altera a baseline e não autoriza integração, escrita,
 > persistência, piloto, publicação operacional ou Sprint.
+
+> **RFC APPROVAL != IMPLEMENTATION AUTHORIZATION.** A decisão
+> `APPROVE_WITH_CONDITIONS` foi ratificada humanamente conforme o REV-002. As
+> COND-001 a COND-005 são vinculantes nos gates ali definidos e não estão
+> automaticamente satisfeitas por esta ratificação. A SPR-018 permanece
+> tecnicamente bloqueada até o atendimento de suas demais precedências,
+> especificações, auditorias e autorizações por pacote.
 
 ## Controle normativo
 
