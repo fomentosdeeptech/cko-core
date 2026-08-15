@@ -1,0 +1,7 @@
+[
+  {"case":"unsupported_major","expected_code":"FCP_UNSUPPORTED_MAJOR"},
+  {"case":"missing_required_capability","expected_code":"FCP_CAPABILITY_ABSENT"},
+  {"case":"closed_field_violation","expected_code":"FCP_INVALID_INPUT"},
+  {"case":"invalid_identity","expected_code":"FCP_INVALID_INPUT"},
+  {"case":"illegal_transition","expected_code":"FCP_ILLEGAL_TRANSITION"}
+]

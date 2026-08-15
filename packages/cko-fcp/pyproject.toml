@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cko-fcp"
+version = "0.1.0"
+description = "Independent distribution of the CKO Federated Catalog Protocol foundation"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["cko_fcp*"]
+exclude = ["tests*", "fixtures*", "reports*", "external*"]
