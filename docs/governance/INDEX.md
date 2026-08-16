@@ -9,10 +9,10 @@ Este é o índice canônico da família documental GOV mantida no repositório
 
 | Campo | Valor |
 |---|---|
-| Data de corte | 15/08/2026 |
+| Data de corte | 16/08/2026 |
 | Autoridade derivada | GOV-009 |
 | Escopo | Documentos GOV mantidos no CORE |
-| Próximo número disponível | GOV-010 |
+| Próximo número disponível | GOV-011 |
 
 O índice institucional externo foi preservado sem alteração como instrumento
 histórico reconhecido e degradado. Ele não é autoridade para novas alocações GOV
@@ -156,6 +156,22 @@ AUTHORITY: EXPRESS HUMAN RATIFICATION; GOVERNANCE INDEX AUTHORITY RECONCILIATION
 NOTES: Cria este índice como autoridade canônica de alocação GOV no CORE,
 preserva o índice externo e estabelece GOV-010 como próximo número disponível.
 
+### GOV-010
+
+NUMBER: GOV-010
+
+TITLE: CKO Product Direction and Local Knowledge Finder MVP
+
+PATH_OR_LOCATION_CLASS: [docs/governance/GOV-010_CKO_PRODUCT_DIRECTION_AND_LOCAL_KNOWLEDGE_FINDER_MVP.md](GOV-010_CKO_PRODUCT_DIRECTION_AND_LOCAL_KNOWLEDGE_FINDER_MVP.md)
+
+STATUS: HUMAN_RATIFIED / ACTIVE
+
+AUTHORITY: EXPRESS HUMAN RATIFICATION; PRODUCT DIRECTION DERIVED FROM EXE-001
+
+NOTES: Formaliza a direção `LOCAL_FIRST / VALUE_ORIENTED / GOVERNED` e define o
+CKO Local Knowledge Finder como primeiro MVP. Incorpora as conclusões da EXE-001;
+implementação, AUD-MVP-001 e P-018-02 permanecem não autorizados.
+
 ## Regra de alocação e atualização
 
 Novos números GOV mantidos no CORE somente podem ser alocados mediante atualização
@@ -166,7 +182,7 @@ reutilizáveis. Toda entrada deve registrar `NUMBER`, `TITLE`,
 
 NEXT_AVAILABLE_GOV_NUMBER:
 
-GOV-010
+GOV-011
 
 OPS_005_AUTHORIZED:
 
