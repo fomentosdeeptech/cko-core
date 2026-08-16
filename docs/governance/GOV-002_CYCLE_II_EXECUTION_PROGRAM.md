@@ -726,5 +726,9 @@ documento e nas autoridades de maior precedência.
 - [CKO-ARCH-002 — Ecosystem Evolution Architecture](../arquitetura/CKO-ARCH-002_ECOSYSTEM_EVOLUTION_ARCHITECTURE.md)
 - [CKO-GOV-001 — Baseline Arquitetural 1.0](../../../docs/governance/CKO-GOV-001_BASELINE_ARQUITETURAL_1.0.md)
 - [CKO-ARCH-001 — Arquitetura Canônica](../../../docs/arquitetura/CKO-ARCH-001_ARQUITETURA_CANONICA.md)
-- [Índice Mestre da Governança](../../../docs/governance/GOVERNANCE_INDEX.md)
+- [Índice Canônico da Família GOV no CORE](INDEX.md) — autoridade corrente reconciliada pelo GOV-009; o índice externo anterior permanece contexto histórico preservado.
 - [Índice de ADRs](../adr/INDEX.md)
+
+GOV002_CHANGE_CLASS: CANONICAL_INDEX_REFERENCE_RECONCILIATION_ONLY
+
+GOV002_SEMANTIC_SCOPE_CHANGED: NO
