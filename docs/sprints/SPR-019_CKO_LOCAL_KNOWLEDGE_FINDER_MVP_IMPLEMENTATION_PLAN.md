@@ -8,7 +8,7 @@ PRODUCT: CKO Local Knowledge Finder
 DISTRIBUTION: cko-local-finder
 IMPORT_NAMESPACE: cko_local_finder
 EXPECTED_PACKAGE_LOCATION: packages/cko-local-finder/
-SPRINT_STATUS: IN_PROGRESS / P-019-01 CONSOLIDATED
+SPRINT_STATUS: IN_PROGRESS / P-019-01 AND P-019-02 CONSOLIDATED
 IMPLEMENTATION_AUTHORIZATION: INCREMENT_SPECIFIC_ONLY
 ```
 
@@ -20,6 +20,7 @@ ADR_008_ALIGNMENT: PASS
 AUD_MVP_001_ALIGNMENT: PASS
 MVP_IMPLEMENTATION_AUTHORIZED: NO
 P_019_01_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
+P_019_02_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
 P_018_02_AUTHORIZED: NO
 ```
 
@@ -39,7 +40,7 @@ cko-local-finder report
 
 ## 3. Planned increments
 
-Exactly nine increments compose the plan. Each remains `PLANNED / NOT AUTHORIZED` and requires a separate human mandate.
+Exactly nine increments compose the plan. Each requires a separate human mandate; P-019-01 and P-019-02 are consolidated.
 
 ### P-019-01 — Package Foundation and Contract Skeleton
 
@@ -54,10 +55,12 @@ Validation evidence: [P-019-01 Package Foundation Validation Report](SPR-019_P-0
 ### P-019-02 — Synthetic Corpus and Test Harness
 
 ```text
-P_019_02_STATUS: PLANNED / NOT AUTHORIZED
+P_019_02_STATUS: IMPLEMENTED / VALIDATED / CONSOLIDATED
 ```
 
 Plan a synthetic corpus with textual PDF, DOCX, TXT, Markdown, an empty file, a corrupted file, an unsupported format, byte-for-byte duplicates, and path and symlink cases. It must contain no personal data or real documents.
+
+Validation evidence: [P-019-02 Synthetic Corpus and Test Harness Validation Report](SPR-019_P-019-02_SYNTHETIC_CORPUS_TEST_HARNESS_VALIDATION_REPORT.md).
 
 ### P-019-03 — Safe Discovery, Identity and Duplicate Detection
 
@@ -129,7 +132,7 @@ P-019-01
 → P-019-09
 ```
 
-No increment may begin through dependency implication. Each requires its own explicit human mandate; the first possible future authorization must address only `P-019-01`.
+No increment may begin through dependency implication. Each requires its own explicit human mandate; the first possible future authorization must address only `P-019-03`.
 
 ## 5. Permanent gates
 
@@ -171,7 +174,7 @@ It must also use a closed path list and controlled staging; run dedicated and pa
 PLANNED_INCREMENT_COUNT: 9
 MVP_IMPLEMENTATION_AUTHORIZED: NO
 P_019_01_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
-P_019_02_AUTHORIZED: NO
+P_019_02_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
 P_019_03_AUTHORIZED: NO
 P_019_04_AUTHORIZED: NO
 P_019_05_AUTHORIZED: NO

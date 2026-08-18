@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {"id": "utf8_text", "path": "valid/sample_utf8.txt", "family": "txt", "condition": "valid", "duplicate": false, "encoding": "utf-8", "structurally_valid": true, "purpose": "Canonical UTF-8 text"},
+    {"id": "utf8_sig_text", "path": "valid/sample_utf8_sig.txt", "family": "txt", "condition": "valid", "duplicate": false, "encoding": "utf-8-sig", "structurally_valid": true, "purpose": "UTF-8 text with BOM"},
+    {"id": "markdown", "path": "valid/sample.md", "family": "markdown", "condition": "valid", "duplicate": false, "encoding": "utf-8", "structurally_valid": true, "purpose": "Canonical Markdown"},
+    {"id": "textual_pdf", "path": "valid/sample.pdf", "family": "pdf", "condition": "valid", "duplicate": false, "encoding": null, "structurally_valid": true, "purpose": "Minimal textual PDF"},
+    {"id": "docx", "path": "valid/sample.docx", "family": "docx", "condition": "valid", "duplicate": false, "encoding": null, "structurally_valid": true, "purpose": "Minimal deterministic DOCX"},
+    {"id": "empty", "path": "edge/empty.txt", "family": "txt", "condition": "empty", "duplicate": false, "encoding": "utf-8", "structurally_valid": true, "purpose": "Empty-file handling"},
+    {"id": "oversized", "path": "edge/oversized.txt", "family": "txt", "condition": "oversized", "duplicate": false, "encoding": "utf-8", "structurally_valid": true, "purpose": "Configurable size-limit handling"},
+    {"id": "corrupt_pdf", "path": "corrupt/corrupt.pdf", "family": "pdf", "condition": "corrupt", "duplicate": false, "encoding": null, "structurally_valid": false, "purpose": "Invalid PDF handling"},
+    {"id": "corrupt_docx", "path": "corrupt/corrupt.docx", "family": "docx", "condition": "corrupt", "duplicate": false, "encoding": null, "structurally_valid": false, "purpose": "Invalid DOCX handling"},
+    {"id": "unsupported", "path": "unsupported/sample.bin", "family": "unsupported", "condition": "unsupported", "duplicate": false, "encoding": null, "structurally_valid": false, "purpose": "Unsupported binary handling"},
+    {"id": "duplicate_original", "path": "duplicates/original.txt", "family": "txt", "condition": "duplicate", "duplicate": true, "encoding": "utf-8", "structurally_valid": true, "purpose": "Byte-identical duplicate original"},
+    {"id": "duplicate_copy", "path": "duplicates/copy.txt", "family": "txt", "condition": "duplicate", "duplicate": true, "encoding": "utf-8", "structurally_valid": true, "purpose": "Byte-identical duplicate copy"}
+  ]
+}
