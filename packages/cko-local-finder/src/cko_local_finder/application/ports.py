@@ -16,6 +16,10 @@ from cko_local_finder.domain.models import (
     ExtractionIssue,
     PersistenceSummary,
     SearchResult,
+    SearchIndexStatus,
+    SearchPage,
+    SearchQuery,
+    IndexingSummary,
     SourceFile,
     StoredDocument,
     StoredLocation,
@@ -63,11 +67,19 @@ class DocumentRepositoryPort(Protocol):
 
 
 class SearchIndexPort(Protocol):
-    """Index and query future extracted text through an abstraction."""
+    """Index and query extracted text without exposing storage details."""
 
-    def index(self, source: SourceFile, extraction: ExtractionResult) -> None: ...
+    def apply_search_migrations(self) -> int: ...
 
-    def search(self, query: str) -> Iterable[SearchResult]: ...
+    def index_document(self, document_sha256: str, observed_at: str) -> IndexingSummary: ...
+
+    def remove_from_index(self, document_sha256: str) -> bool: ...
+
+    def rebuild_index(self, observed_at: str) -> IndexingSummary: ...
+
+    def search(self, query: SearchQuery) -> SearchPage: ...
+
+    def search_index_status(self) -> SearchIndexStatus: ...
 
 
 class ProvenancePort(Protocol):

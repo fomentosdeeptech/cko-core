@@ -4,15 +4,17 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import sqlite3
 from typing import Iterator
 
 from cko_local_finder.domain.models import (
     DatabaseCapability, DiscoveryIssue, DiscoveryReport, DuplicateGroup,
-    ExtractionIssue, ExtractionResult, PersistenceSummary, StoredDocument, StoredLocation,
+    ExtractionIssue, ExtractionResult, IndexingSummary, PersistenceSummary, SearchIndexStatus,
+    SearchPage, SearchQuery, StoredDocument, StoredLocation,
 )
-from cko_local_finder.infrastructure.migrations import apply_migrations
+from cko_local_finder.infrastructure.migrations import MIGRATIONS, apply_migrations
+from cko_local_finder.infrastructure.search import execute_search
 
 
 class RepositoryError(RuntimeError):
@@ -66,7 +68,17 @@ class SQLiteDocumentRepository:
     def apply_migrations(self) -> int:
         try:
             with self.connection() as connection:
-                return apply_migrations(connection)
+                current = int(connection.execute("PRAGMA user_version").fetchone()[0])
+                if current == 2:
+                    return current
+                return apply_migrations(connection, MIGRATIONS[:1])
+        except sqlite3.Error as exc:
+            raise RepositoryError("database operation failed") from exc
+
+    def apply_search_migrations(self) -> int:
+        try:
+            with self.connection() as connection:
+                return apply_migrations(connection, MIGRATIONS)
         except sqlite3.Error as exc:
             raise RepositoryError("database operation failed") from exc
 
@@ -210,3 +222,79 @@ class SQLiteDocumentRepository:
             schema_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
             available = _probe_fts5(connection)
         return DatabaseCapability(sqlite3.sqlite_version, available, foreign_keys, schema_version)
+
+    def _index_document_active(self, document_sha256: str, observed_at: str) -> IndexingSummary:
+        connection = self._connection()
+        existing = connection.execute(
+            "SELECT 1 FROM search_index_documents WHERE document_sha256=?", (document_sha256,)
+        ).fetchone()
+        row = connection.execute(
+            """SELECT e.id extraction_id,e.status,e.text_content,d.extension,d.media_type,
+                      l.root,l.relative_path
+               FROM documents d
+               LEFT JOIN extractions e ON e.document_sha256=d.sha256
+               LEFT JOIN document_locations l ON l.document_sha256=d.sha256
+               WHERE d.sha256=?
+               ORDER BY e.id DESC,l.relative_path COLLATE NOCASE,l.relative_path LIMIT 1""",
+            (document_sha256,),
+        ).fetchone()
+        if row is None or row["status"] != "SUCCESS" or not (row["text_content"] or "").strip():
+            removed = connection.execute(
+                "DELETE FROM search_index_documents WHERE document_sha256=?", (document_sha256,)
+            ).rowcount
+            return IndexingSummary(1, 0, 0, int(bool(removed)), 1, 0, 2)
+        title = PurePosixPath(row["relative_path"]).stem
+        if existing:
+            connection.execute(
+                """UPDATE search_index_documents SET extraction_id=?,title=?,body=?,extension=?,
+                   media_type=?,root=?,relative_path=?,indexed_at=? WHERE document_sha256=?""",
+                (row["extraction_id"], title, row["text_content"], row["extension"], row["media_type"],
+                 row["root"], row["relative_path"], observed_at, document_sha256),
+            )
+            return IndexingSummary(1, 0, 1, 0, 0, 0, 2)
+        connection.execute(
+            """INSERT INTO search_index_documents(document_sha256,extraction_id,title,body,extension,
+               media_type,root,relative_path,indexed_at) VALUES(?,?,?,?,?,?,?,?,?)""",
+            (document_sha256, row["extraction_id"], title, row["text_content"], row["extension"],
+             row["media_type"], row["root"], row["relative_path"], observed_at),
+        )
+        return IndexingSummary(1, 1, 0, 0, 0, 0, 2)
+
+    def index_document(self, document_sha256: str, observed_at: str) -> IndexingSummary:
+        with self.transaction():
+            return self._index_document_active(document_sha256, observed_at)
+
+    def remove_from_index(self, document_sha256: str) -> bool:
+        with self.transaction():
+            return bool(self._connection().execute(
+                "DELETE FROM search_index_documents WHERE document_sha256=?", (document_sha256,)
+            ).rowcount)
+
+    def rebuild_index(self, observed_at: str) -> IndexingSummary:
+        with self.transaction():
+            connection = self._connection()
+            connection.execute("DELETE FROM search_index_documents")
+            digests = [row[0] for row in connection.execute("SELECT sha256 FROM documents ORDER BY sha256")]
+            totals = [0] * 6
+            for digest in digests:
+                item = self._index_document_active(digest, observed_at)
+                totals = [a + b for a, b in zip(totals, (item.documents_considered, item.documents_indexed,
+                          item.documents_updated, item.documents_removed, item.documents_ignored, item.failures))]
+        return IndexingSummary(*totals, 2)
+
+    def search(self, query: SearchQuery) -> SearchPage:
+        with self.connection() as connection:
+            try:
+                return execute_search(connection, query)
+            except sqlite3.Error as exc:
+                raise RepositoryError("search operation failed") from exc
+
+    def search_index_status(self) -> SearchIndexStatus:
+        capability = self.capabilities()
+        with self.connection() as connection:
+            exists = connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='search_index_documents'"
+            ).fetchone()
+            count = connection.execute("SELECT count(*) FROM search_index_documents").fetchone()[0] if exists else 0
+        return SearchIndexStatus(capability.fts5_available, int(count), capability.schema_version,
+                                 capability.schema_version != 2)

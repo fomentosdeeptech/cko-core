@@ -23,10 +23,12 @@ def test_production_remains_contract_skeleton() -> None:
         "application/discovery.py", "application/duplicates.py",
         "application/persistence.py",
         "application/extraction.py",
+        "application/indexing.py", "application/search.py",
         "infrastructure/__init__.py", "infrastructure/filesystem.py",
         "infrastructure/hashing.py", "infrastructure/migrations.py",
         "infrastructure/sqlite.py",
         "infrastructure/extractors.py", "infrastructure/text.py",
+        "infrastructure/search.py",
     }
     actual = {path.relative_to(PRODUCTION_ROOT).as_posix() for path in _production_sources()}
     assert actual == expected
@@ -34,7 +36,7 @@ def test_production_remains_contract_skeleton() -> None:
 
 def test_no_forbidden_production_capabilities_or_imports() -> None:
     forbidden_imports = {"click", "typer", "sqlalchemy", "pytesseract"}
-    forbidden_calls = {"index", "search", "ocr"}
+    forbidden_calls = {"ocr", "embed"}
     for path in _production_sources():
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):
@@ -71,6 +73,6 @@ def test_p01903_scope_and_root_api_remain_narrow() -> None:
 
     assert cko_local_finder.__all__ == ("__version__",)
     production = "\n".join(path.read_text(encoding="utf-8").lower() for path in _production_sources())
-    for forbidden in ("pytesseract", "argparse", "create virtual table main", "create virtual table fts"):
+    for forbidden in ("pytesseract", "argparse", "embedding", "vector", "requests", "httpx"):
         assert forbidden not in production
     assert not any((PRODUCTION_ROOT / "infrastructure").glob("*persist*"))

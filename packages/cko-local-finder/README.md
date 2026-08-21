@@ -1,11 +1,11 @@
 # CKO Local Knowledge Finder
 
-`cko-local-finder` is the independently installable package planned by GOV-010 and architecturally constrained by ADR-008. Version `0.1.0` includes the consolidated P-019-01 through P-019-05 internal capabilities.
+`cko-local-finder` is the independently installable package planned by GOV-010 and architecturally constrained by ADR-008. Version `0.1.0` includes the consolidated P-019-01 through P-019-06 internal capabilities.
 
 ## Status
 
 ```text
-STATUS: P-019-01 THROUGH P-019-05 IMPLEMENTED
+STATUS: P-019-01 THROUGH P-019-06 IMPLEMENTED
 VERSION: 0.1.0
 MVP_USABLE: NO
 P_019_01_STATUS: CONSOLIDATED
@@ -13,7 +13,8 @@ P_019_02_STATUS: CONSOLIDATED
 P_019_03_STATUS: CONSOLIDATED
 P_019_04_STATUS: CONSOLIDATED
 P_019_05_STATUS: CONSOLIDATED
-P_019_06_AUTHORIZED: NO
+P_019_06_STATUS: CONSOLIDATED
+P_019_07_AUTHORIZED: NO
 ```
 
 The package is typed, depends directly only on `pypdf` and `python-docx`, and does not modify or extend the public API of the `cko` distribution.
@@ -21,8 +22,8 @@ The package is typed, depends directly only on `pypdf` and `python-docx`, and do
 ## Architecture
 
 - `cko_local_finder.domain`: immutable, technology-neutral contract models.
-- `cko_local_finder.application`: abstract ports plus discovery, duplicate grouping, persistence, and extraction orchestration.
-- `cko_local_finder.infrastructure`: confined discovery, hashing, SQLite persistence, deterministic text normalization, and TXT, Markdown, textual PDF, and DOCX extractors.
+- `cko_local_finder.application`: abstract ports plus discovery, extraction, indexing, rebuild, and search orchestration.
+- `cko_local_finder.infrastructure`: confined discovery, extraction, SQLite persistence, and safe FTS5 search execution.
 - `cko_local_finder.cli`: reserved namespace for future CLI composition; currently empty and has no entry point.
 
 The root package exposes only `__version__`. Domain models and application ports must be imported from their owning modules.
@@ -33,9 +34,11 @@ Discovery reports can be persisted in an explicit SQLite database as derived, re
 
 Internal text extraction supports UTF-8 TXT, UTF-8 Markdown, textual PDF through `pypdf`, and DOCX paragraphs and tables through `python-docx`. Extraction results, statuses, technical metadata, and isolated failures are persisted transactionally and idempotently. PDF files without text return `NO_TEXT`; OCR is never attempted. DOCX ZIP structure and safety limits are checked before parsing.
 
+Schema version 2 adds one persistent FTS5 table using `unicode61 remove_diacritics 2`, a derived index projection, strict synchronization triggers, idempotent reindexing, and full rebuild from persisted state without rereading source files. Internal text search uses literal parameterized queries, BM25 ranking with deterministic tie-breaking, bounded highlighted snippets, pagination, and explicit extension, media type, root, relative-path prefix, and SHA-256 filters.
+
 ## Not implemented
 
-There is no OCR, functional CLI, persistent FTS index, textual search, or final-user workflow. The product is not ready for end use, and P-019-06 is not authorized.
+There is no OCR, functional CLI, semantic or vector search, RAG, remote access, or final-user workflow. The product is not ready for end use, and P-019-07 is not authorized.
 
 ## Development installation and tests
 
@@ -46,4 +49,4 @@ python -m pip install -e packages/cko-local-finder
 python -m pytest packages/cko-local-finder/tests
 ```
 
-These instructions exercise internal package capabilities only. They do not make the MVP usable and do not authorize P-019-06 or any later increment.
+These instructions exercise internal package capabilities only. They do not make the MVP usable and do not authorize P-019-07 or any later increment.

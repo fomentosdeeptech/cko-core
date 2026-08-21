@@ -93,11 +93,67 @@ class SearchResult:
     snippet: str
     path: str
     sha256: str
+    title: str = ""
+    extension: str = ""
+    media_type: str = ""
+    root: str = ""
 
     def __post_init__(self) -> None:
         _require_text(self.source_id, "source_id")
         _require_text(self.path, "path")
         _require_text(self.sha256, "sha256")
+
+
+@dataclass(frozen=True, slots=True)
+class SearchFilter:
+    extension: str | None = None
+    media_type: str | None = None
+    root: str | None = None
+    path_prefix: str | None = None
+    sha256: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.path_prefix is not None:
+            path = PurePosixPath(self.path_prefix)
+            if path.is_absolute() or ".." in path.parts:
+                raise ValueError("path_prefix must remain relative")
+
+
+@dataclass(frozen=True, slots=True)
+class SearchQuery:
+    text: str
+    filters: SearchFilter = SearchFilter()
+    limit: int = 20
+    offset: int = 0
+    snippet_tokens: int = 24
+
+
+@dataclass(frozen=True, slots=True)
+class SearchPage:
+    normalized_query: str
+    results: tuple[SearchResult, ...]
+    total_matches: int
+    limit: int
+    offset: int
+
+
+@dataclass(frozen=True, slots=True)
+class IndexingSummary:
+    documents_considered: int
+    documents_indexed: int
+    documents_updated: int
+    documents_removed: int
+    documents_ignored: int
+    failures: int
+    schema_version: int
+
+
+@dataclass(frozen=True, slots=True)
+class SearchIndexStatus:
+    fts5_available: bool
+    indexed_count: int
+    schema_version: int
+    rebuild_required: bool
 
 
 @dataclass(frozen=True, slots=True)

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import hashlib
 import sqlite3
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 # BEGIN IMMEDIATE serializes adapter writes; the repository updates by this
 # logical identity, so schema v1 needs no compatibility-breaking migration.
 EXTRACTION_IDENTITY_COLUMNS = ("document_sha256", "extractor", "extractor_version")
@@ -64,6 +64,31 @@ MIGRATIONS = (
         "CREATE INDEX idx_document_locations_document ON document_locations(document_sha256)",
         "CREATE INDEX idx_document_locations_relative_path ON document_locations(relative_path)",
         "CREATE INDEX idx_processing_issues_stage_code ON processing_issues(stage, code)",
+    )),
+    Migration(2, "fts5_search_projection", (
+        """CREATE TABLE search_index_documents (
+            id INTEGER PRIMARY KEY, document_sha256 TEXT NOT NULL UNIQUE,
+            extraction_id INTEGER NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL,
+            extension TEXT NOT NULL, media_type TEXT NOT NULL, root TEXT NOT NULL,
+            relative_path TEXT NOT NULL, indexed_at TEXT NOT NULL,
+            FOREIGN KEY(document_sha256) REFERENCES documents(sha256),
+            FOREIGN KEY(extraction_id) REFERENCES extractions(id)
+        )""",
+        """CREATE VIRTUAL TABLE search_fts USING fts5(
+            title, body, content='search_index_documents', content_rowid='id',
+            tokenize='unicode61 remove_diacritics 2'
+        )""",
+        """CREATE TRIGGER search_index_ai AFTER INSERT ON search_index_documents BEGIN
+            INSERT INTO search_fts(rowid,title,body) VALUES(new.id,new.title,new.body);
+        END""",
+        """CREATE TRIGGER search_index_ad AFTER DELETE ON search_index_documents BEGIN
+            INSERT INTO search_fts(search_fts,rowid,title,body) VALUES('delete',old.id,old.title,old.body);
+        END""",
+        """CREATE TRIGGER search_index_au AFTER UPDATE ON search_index_documents BEGIN
+            INSERT INTO search_fts(search_fts,rowid,title,body) VALUES('delete',old.id,old.title,old.body);
+            INSERT INTO search_fts(rowid,title,body) VALUES(new.id,new.title,new.body);
+        END""",
+        "CREATE INDEX idx_search_projection_filters ON search_index_documents(extension,media_type,root,relative_path)",
     )),
 )
 
