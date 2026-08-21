@@ -27,7 +27,7 @@ def test_four_architecture_namespaces_exist() -> None:
 
 
 def test_dependency_direction_and_forbidden_imports() -> None:
-    forbidden = {"cko", "cko_fcp", "sqlite3", "pypdf", "docx"}
+    forbidden = {"cko", "cko_fcp", "pypdf", "docx"}
     for path in SOURCE.rglob("*.py"):
         roots = _absolute_import_roots(path)
         assert not roots & forbidden, f"forbidden import in {path}: {roots & forbidden}"
@@ -37,7 +37,7 @@ def test_dependency_direction_and_forbidden_imports() -> None:
 
 
 def test_only_authorized_discovery_adapters_and_no_functional_cli() -> None:
-    allowed = {"__init__.py", "filesystem.py", "hashing.py"}
+    allowed = {"__init__.py", "filesystem.py", "hashing.py", "migrations.py", "sqlite.py"}
     assert {path.name for path in (SOURCE / "infrastructure").glob("*.py")} == allowed
     assert list((SOURCE / "cli").glob("*.py")) == [SOURCE / "cli" / "__init__.py"]
     metadata = tomllib.loads((PROJECT / "pyproject.toml").read_text(encoding="utf-8"))

@@ -3,9 +3,21 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from contextlib import AbstractContextManager
 from typing import Protocol
 
-from cko_local_finder.domain.models import ExtractionResult, SearchResult, SourceFile
+from cko_local_finder.domain.models import (
+    DatabaseCapability,
+    DiscoveryIssue,
+    DiscoveryReport,
+    DuplicateGroup,
+    ExtractionResult,
+    PersistenceSummary,
+    SearchResult,
+    SourceFile,
+    StoredDocument,
+    StoredLocation,
+)
 
 
 class DiscoveryPort(Protocol):
@@ -23,13 +35,23 @@ class ExtractorPort(Protocol):
 
 
 class DocumentRepositoryPort(Protocol):
-    """Persist and retrieve future document records through an abstraction."""
+    """Persist discovery state without exposing SQLite implementation details."""
 
-    def save(self, source: SourceFile, extraction: ExtractionResult) -> None: ...
+    def apply_migrations(self) -> int: ...
 
-    def get(self, source_id: str) -> ExtractionResult | None: ...
+    def transaction(self) -> AbstractContextManager[None]: ...
 
-    def find_duplicates(self, sha256: str) -> Iterable[SourceFile]: ...
+    def persist_report(self, report: DiscoveryReport, observed_at: str) -> PersistenceSummary: ...
+
+    def get_document(self, sha256: str) -> StoredDocument | None: ...
+
+    def list_locations(self, sha256: str) -> tuple[StoredLocation, ...]: ...
+
+    def find_duplicates(self) -> tuple[DuplicateGroup, ...]: ...
+
+    def record_issue(self, issue: DiscoveryIssue, observed_at: str) -> bool: ...
+
+    def capabilities(self) -> DatabaseCapability: ...
 
 
 class SearchIndexPort(Protocol):

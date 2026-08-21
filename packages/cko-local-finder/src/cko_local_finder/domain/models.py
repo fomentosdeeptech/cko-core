@@ -183,3 +183,53 @@ class DiscoveryReport:
             raise ValueError("duplicate_group_count must match duplicate_groups")
         if self.issue_count != len(self.issues):
             raise ValueError("issue_count must match issues")
+
+
+@dataclass(frozen=True, slots=True)
+class StoredDocument:
+    sha256: str
+    size_bytes: int
+    extension: str
+    media_type: str
+    first_seen: str
+    last_seen: str
+    physical_metadata: Metadata = ()
+
+
+@dataclass(frozen=True, slots=True)
+class StoredLocation:
+    document_sha256: str
+    root: str
+    relative_path: str
+    observed_size_bytes: int
+    mtime_ns: int
+    first_seen: str
+    last_seen: str
+
+
+@dataclass(frozen=True, slots=True)
+class StoredIssue:
+    relative_path: str
+    stage: str
+    code: str
+    message: str
+    recoverable: bool
+    observed_at: str
+
+
+@dataclass(frozen=True, slots=True)
+class PersistenceSummary:
+    documents_inserted: int
+    documents_updated: int
+    locations_inserted: int
+    locations_updated: int
+    issues_recorded: int
+    schema_version: int
+
+
+@dataclass(frozen=True, slots=True)
+class DatabaseCapability:
+    sqlite_version: str
+    fts5_available: bool
+    foreign_keys_enabled: bool
+    schema_version: int

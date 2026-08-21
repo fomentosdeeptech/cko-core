@@ -8,7 +8,7 @@ PRODUCT: CKO Local Knowledge Finder
 DISTRIBUTION: cko-local-finder
 IMPORT_NAMESPACE: cko_local_finder
 EXPECTED_PACKAGE_LOCATION: packages/cko-local-finder/
-SPRINT_STATUS: IN_PROGRESS / P-019-01 THROUGH P-019-03 CONSOLIDATED
+SPRINT_STATUS: IN_PROGRESS / P-019-01 THROUGH P-019-04 CONSOLIDATED
 IMPLEMENTATION_AUTHORIZATION: INCREMENT_SPECIFIC_ONLY
 ```
 
@@ -22,6 +22,7 @@ MVP_IMPLEMENTATION_AUTHORIZED: NO
 P_019_01_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
 P_019_02_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
 P_019_03_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
+P_019_04_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
 P_018_02_AUTHORIZED: NO
 ```
 
@@ -41,7 +42,7 @@ cko-local-finder report
 
 ## 3. Planned increments
 
-Exactly nine increments compose the plan. Each requires a separate human mandate; P-019-01 and P-019-02 are consolidated.
+Exactly nine increments compose the plan. Each requires a separate human mandate; P-019-01 through P-019-04 are consolidated.
 
 ### P-019-01 — Package Foundation and Contract Skeleton
 
@@ -76,10 +77,12 @@ Validation evidence: [P-019-03 Safe Discovery, Identity and Duplicate Detection 
 ### P-019-04 — Versioned SQLite Persistence
 
 ```text
-P_019_04_STATUS: PLANNED / NOT AUTHORIZED
+P_019_04_STATUS: IMPLEMENTED / VALIDATED / CONSOLIDATED
 ```
 
 Plan a minimal document schema and versioned migrations for documents, locations, hashes, extractions, metadata, and errors; require idempotency, rollback, reconstruction, and explicit FTS5 availability verification.
+
+Validation evidence: [P-019-04 Versioned SQLite Persistence Validation Report](SPR-019_P-019-04_VERSIONED_SQLITE_PERSISTENCE_VALIDATION_REPORT.md).
 
 ### P-019-05 — Document Extraction
 
@@ -135,7 +138,7 @@ P-019-01
 → P-019-09
 ```
 
-No increment may begin through dependency implication. Each requires its own explicit human mandate; the first possible future authorization must address only `P-019-04`.
+No increment may begin through dependency implication. Each requires its own explicit human mandate; the first possible future authorization must address only `P-019-05`.
 
 ## 5. Permanent gates
 
