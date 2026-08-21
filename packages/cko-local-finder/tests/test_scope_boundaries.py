@@ -20,15 +20,17 @@ def test_production_remains_contract_skeleton() -> None:
     expected = {
         "__init__.py", "application/__init__.py", "application/ports.py",
         "cli/__init__.py", "domain/__init__.py", "domain/models.py",
-        "infrastructure/__init__.py",
+        "application/discovery.py", "application/duplicates.py",
+        "infrastructure/__init__.py", "infrastructure/filesystem.py",
+        "infrastructure/hashing.py",
     }
     actual = {path.relative_to(PRODUCTION_ROOT).as_posix() for path in _production_sources()}
     assert actual == expected
 
 
 def test_no_forbidden_production_capabilities_or_imports() -> None:
-    forbidden_imports = {"pypdf", "docx", "sqlite3", "click", "typer"}
-    forbidden_calls = {"open", "connect", "walk", "rglob", "sha256"}
+    forbidden_imports = {"pypdf", "docx", "sqlite3", "click", "typer", "sqlalchemy"}
+    forbidden_calls = {"connect", "execute", "extract", "index", "search"}
     for path in _production_sources():
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):
@@ -58,3 +60,14 @@ def test_importing_factory_creates_no_files(tmp_path: Path) -> None:
     )
     assert result.returncode == 0, result.stderr
     assert list(tmp_path.iterdir()) == []
+
+
+def test_p01903_scope_and_root_api_remain_narrow() -> None:
+    import cko_local_finder
+
+    assert cko_local_finder.__all__ == ("__version__",)
+    production = "\n".join(path.read_text(encoding="utf-8").lower() for path in _production_sources())
+    for forbidden in ("pypdf", "python-docx", "sqlite", "fts5", "create table", "argparse"):
+        assert forbidden not in production
+    assert not any((PRODUCTION_ROOT / "infrastructure").glob("*extract*"))
+    assert not any((PRODUCTION_ROOT / "infrastructure").glob("*persist*"))

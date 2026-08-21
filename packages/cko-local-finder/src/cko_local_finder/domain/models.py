@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import PurePosixPath
 
 
 Metadata = tuple[tuple[str, str], ...]
@@ -79,3 +80,106 @@ class ProcessingError:
         _require_text(self.stage, "stage")
         _require_text(self.code, "code")
         _require_text(self.message, "message")
+
+
+@dataclass(frozen=True, slots=True)
+class DiscoveryPolicy:
+    """Immutable policy for one local discovery operation."""
+
+    supported_extensions: tuple[str, ...] = (".pdf", ".docx", ".txt", ".md", ".markdown")
+    ignore_hidden: bool = True
+    follow_symlinks: bool = False
+    hash_chunk_size: int = 1024 * 1024
+
+    def __post_init__(self) -> None:
+        normalized = tuple(sorted({item.lower() for item in self.supported_extensions}))
+        if not normalized or any(not item.startswith(".") for item in normalized):
+            raise ValueError("supported_extensions must contain dotted extensions")
+        if self.hash_chunk_size <= 0:
+            raise ValueError("hash_chunk_size must be positive")
+        object.__setattr__(self, "supported_extensions", normalized)
+
+
+@dataclass(frozen=True, slots=True)
+class DiscoveryIssue:
+    """Sanitized, deterministic description of an isolated discovery failure."""
+
+    path: str
+    stage: str
+    code: str
+    message: str
+    recoverable: bool = True
+
+    def __post_init__(self) -> None:
+        for name in ("path", "stage", "code", "message"):
+            _require_text(getattr(self, name), name)
+
+
+@dataclass(frozen=True, slots=True)
+class DiscoveredFile:
+    """Physical identity and one observed location below an authorized root."""
+
+    file_id: str
+    absolute_path: str
+    relative_path: str
+    sha256: str
+    size_bytes: int
+    extension: str
+    modified_at_ns: int
+    media_type: str
+    hidden: bool = False
+
+    def __post_init__(self) -> None:
+        for name in ("file_id", "absolute_path", "relative_path", "sha256", "extension", "media_type"):
+            _require_text(getattr(self, name), name)
+        if len(self.sha256) != 64 or any(char not in "0123456789abcdef" for char in self.sha256):
+            raise ValueError("sha256 must be 64 lowercase hexadecimal characters")
+        if self.file_id != self.sha256:
+            raise ValueError("file_id must equal the physical SHA-256 identity")
+        if self.size_bytes < 0 or self.modified_at_ns < 0:
+            raise ValueError("observed file metadata must not be negative")
+        relative = PurePosixPath(self.relative_path)
+        if relative.is_absolute() or ".." in relative.parts:
+            raise ValueError("relative_path must be confined and relative")
+
+
+@dataclass(frozen=True, slots=True)
+class DuplicateGroup:
+    """All observed locations sharing one byte-level identity."""
+
+    sha256: str
+    size_bytes: int
+    relative_paths: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if len(self.sha256) != 64:
+            raise ValueError("sha256 must contain 64 characters")
+        if self.size_bytes < 0 or len(self.relative_paths) < 2:
+            raise ValueError("duplicate group requires at least two locations")
+        if self.relative_paths != tuple(sorted(set(self.relative_paths), key=lambda value: (value.casefold(), value))):
+            raise ValueError("relative_paths must be unique and deterministically ordered")
+
+
+@dataclass(frozen=True, slots=True)
+class DiscoveryReport:
+    """Immutable in-memory result of one confined discovery operation."""
+
+    root: str
+    files: tuple[DiscoveredFile, ...]
+    duplicate_groups: tuple[DuplicateGroup, ...]
+    ignored_count: int
+    issues: tuple[DiscoveryIssue, ...]
+    discovered_count: int
+    duplicate_group_count: int
+    issue_count: int
+
+    def __post_init__(self) -> None:
+        _require_text(self.root, "root")
+        if min(self.ignored_count, self.discovered_count, self.duplicate_group_count, self.issue_count) < 0:
+            raise ValueError("summary counts must not be negative")
+        if self.discovered_count != len(self.files):
+            raise ValueError("discovered_count must match files")
+        if self.duplicate_group_count != len(self.duplicate_groups):
+            raise ValueError("duplicate_group_count must match duplicate_groups")
+        if self.issue_count != len(self.issues):
+            raise ValueError("issue_count must match issues")

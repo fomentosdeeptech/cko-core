@@ -36,8 +36,9 @@ def test_dependency_direction_and_forbidden_imports() -> None:
             assert not roots & {"application", "infrastructure", "cli"}
 
 
-def test_no_concrete_adapter_or_functional_cli() -> None:
-    assert list((SOURCE / "infrastructure").glob("*.py")) == [SOURCE / "infrastructure" / "__init__.py"]
+def test_only_authorized_discovery_adapters_and_no_functional_cli() -> None:
+    allowed = {"__init__.py", "filesystem.py", "hashing.py"}
+    assert {path.name for path in (SOURCE / "infrastructure").glob("*.py")} == allowed
     assert list((SOURCE / "cli").glob("*.py")) == [SOURCE / "cli" / "__init__.py"]
     metadata = tomllib.loads((PROJECT / "pyproject.toml").read_text(encoding="utf-8"))
     assert "scripts" not in metadata["project"]
