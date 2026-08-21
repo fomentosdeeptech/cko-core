@@ -10,8 +10,10 @@ from cko_local_finder.domain.models import (
     DatabaseCapability,
     DiscoveryIssue,
     DiscoveryReport,
+    DiscoveredFile,
     DuplicateGroup,
     ExtractionResult,
+    ExtractionIssue,
     PersistenceSummary,
     SearchResult,
     SourceFile,
@@ -29,9 +31,9 @@ class DiscoveryPort(Protocol):
 class ExtractorPort(Protocol):
     """Describe a future document extraction capability."""
 
-    def supports(self, source: SourceFile) -> bool: ...
+    def supports(self, source: DiscoveredFile) -> bool: ...
 
-    def extract(self, source: SourceFile) -> ExtractionResult: ...
+    def extract(self, source: DiscoveredFile) -> ExtractionResult: ...
 
 
 class DocumentRepositoryPort(Protocol):
@@ -50,6 +52,12 @@ class DocumentRepositoryPort(Protocol):
     def find_duplicates(self) -> tuple[DuplicateGroup, ...]: ...
 
     def record_issue(self, issue: DiscoveryIssue, observed_at: str) -> bool: ...
+
+    def save_extraction(self, result: ExtractionResult, observed_at: str) -> None: ...
+
+    def get_extraction(self, document_sha256: str, extractor: str, extractor_version: str) -> ExtractionResult | None: ...
+
+    def record_extraction_issue(self, issue: ExtractionIssue, observed_at: str) -> None: ...
 
     def capabilities(self) -> DatabaseCapability: ...
 

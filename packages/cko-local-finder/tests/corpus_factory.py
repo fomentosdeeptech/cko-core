@@ -12,6 +12,16 @@ DEFAULT_TEST_SIZE_LIMIT = 128
 ZIP_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
 
 
+def write_extraction_case(root: Path, name: str, payload: bytes) -> Path:
+    """Write one temporary extraction-only case below an explicit test root."""
+    target = root / name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if not target.resolve().is_relative_to(root.resolve()):
+        raise ValueError("extraction case escapes root")
+    target.write_bytes(payload)
+    return target
+
+
 def _minimal_pdf() -> bytes:
     stream = b"BT /F1 12 Tf 72 720 Td (Synthetic local knowledge corpus) Tj ET"
     objects = [

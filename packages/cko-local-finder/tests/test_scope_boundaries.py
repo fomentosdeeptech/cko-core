@@ -22,17 +22,19 @@ def test_production_remains_contract_skeleton() -> None:
         "cli/__init__.py", "domain/__init__.py", "domain/models.py",
         "application/discovery.py", "application/duplicates.py",
         "application/persistence.py",
+        "application/extraction.py",
         "infrastructure/__init__.py", "infrastructure/filesystem.py",
         "infrastructure/hashing.py", "infrastructure/migrations.py",
         "infrastructure/sqlite.py",
+        "infrastructure/extractors.py", "infrastructure/text.py",
     }
     actual = {path.relative_to(PRODUCTION_ROOT).as_posix() for path in _production_sources()}
     assert actual == expected
 
 
 def test_no_forbidden_production_capabilities_or_imports() -> None:
-    forbidden_imports = {"pypdf", "docx", "click", "typer", "sqlalchemy"}
-    forbidden_calls = {"extract", "index", "search"}
+    forbidden_imports = {"click", "typer", "sqlalchemy", "pytesseract"}
+    forbidden_calls = {"index", "search", "ocr"}
     for path in _production_sources():
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):
@@ -45,9 +47,9 @@ def test_no_forbidden_production_capabilities_or_imports() -> None:
                 assert name not in forbidden_calls
 
 
-def test_no_runtime_dependency_added() -> None:
+def test_only_authorized_runtime_dependencies_added() -> None:
     project = tomllib.loads((PACKAGE_ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
-    assert project["dependencies"] == []
+    assert project["dependencies"] == ["pypdf>=5,<7", "python-docx>=1.1,<2"]
     assert project["optional-dependencies"] == {"test": ["pytest>=8,<9"]}
 
 
@@ -69,7 +71,6 @@ def test_p01903_scope_and_root_api_remain_narrow() -> None:
 
     assert cko_local_finder.__all__ == ("__version__",)
     production = "\n".join(path.read_text(encoding="utf-8").lower() for path in _production_sources())
-    for forbidden in ("pypdf", "python-docx", "argparse", "create virtual table main", "create virtual table fts"):
+    for forbidden in ("pytesseract", "argparse", "create virtual table main", "create virtual table fts"):
         assert forbidden not in production
-    assert not any((PRODUCTION_ROOT / "infrastructure").glob("*extract*"))
     assert not any((PRODUCTION_ROOT / "infrastructure").glob("*persist*"))

@@ -42,11 +42,46 @@ class ExtractionResult:
     extractor: str
     extractor_version: str
     metadata: Metadata = ()
+    status: str = "SUCCESS"
 
     def __post_init__(self) -> None:
         _require_text(self.source_id, "source_id")
         _require_text(self.extractor, "extractor")
         _require_text(self.extractor_version, "extractor_version")
+        _require_text(self.status, "status")
+
+
+@dataclass(frozen=True, slots=True)
+class ExtractionPolicy:
+    max_source_file_size: int = 50 * 1024 * 1024
+    max_extracted_characters: int = 5_000_000
+    max_docx_archive_entries: int = 10_000
+    max_docx_uncompressed_bytes: int = 100 * 1024 * 1024
+    default_text_encoding: str = "utf-8"
+
+    def __post_init__(self) -> None:
+        if min(self.max_source_file_size, self.max_extracted_characters,
+               self.max_docx_archive_entries, self.max_docx_uncompressed_bytes) <= 0:
+            raise ValueError("extraction limits must be positive")
+
+
+@dataclass(frozen=True, slots=True)
+class ExtractionIssue:
+    source_id: str
+    path: str
+    code: str
+    message: str
+    recoverable: bool = True
+    observed_size: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ExtractionBatchResult:
+    results: tuple[ExtractionResult, ...]
+    issues: tuple[ExtractionIssue, ...]
+    processed_count: int
+    success_count: int
+    issue_count: int
 
 
 @dataclass(frozen=True, slots=True)

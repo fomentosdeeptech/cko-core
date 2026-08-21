@@ -10,7 +10,7 @@ from typing import Iterator
 
 from cko_local_finder.domain.models import (
     DatabaseCapability, DiscoveryIssue, DiscoveryReport, DuplicateGroup,
-    PersistenceSummary, StoredDocument, StoredLocation,
+    ExtractionIssue, ExtractionResult, PersistenceSummary, StoredDocument, StoredLocation,
 )
 from cko_local_finder.infrastructure.migrations import apply_migrations
 
@@ -137,6 +137,44 @@ class SQLiteDocumentRepository:
             (issue.path, issue.stage, issue.code, issue.message, int(issue.recoverable), observed_at),
         )
         return cursor.rowcount == 1
+
+    def save_extraction(self, result: ExtractionResult, observed_at: str) -> None:
+        connection = self._connection()
+        metadata = json.dumps(dict(result.metadata), sort_keys=True, separators=(",", ":"))
+        existing = connection.execute(
+            "SELECT id FROM extractions WHERE document_sha256=? AND extractor=? AND extractor_version=? ORDER BY id LIMIT 1",
+            (result.source_id, result.extractor, result.extractor_version),
+        ).fetchone()
+        if existing:
+            connection.execute(
+                "UPDATE extractions SET status=?,text_content=?,metadata_json=?,observed_at=? WHERE id=?",
+                (result.status, result.text, metadata, observed_at, existing["id"]),
+            )
+        else:
+            connection.execute(
+                "INSERT INTO extractions(document_sha256,extractor,extractor_version,status,text_content,metadata_json,observed_at) VALUES(?,?,?,?,?,?,?)",
+                (result.source_id, result.extractor, result.extractor_version, result.status,
+                 result.text, metadata, observed_at),
+            )
+
+    def get_extraction(self, document_sha256: str, extractor: str,
+                       extractor_version: str) -> ExtractionResult | None:
+        with self.connection() as connection:
+            row = connection.execute(
+                "SELECT * FROM extractions WHERE document_sha256=? AND extractor=? AND extractor_version=? ORDER BY id DESC LIMIT 1",
+                (document_sha256, extractor, extractor_version),
+            ).fetchone()
+        if row is None:
+            return None
+        metadata = tuple(sorted((str(key), str(value)) for key, value in json.loads(row["metadata_json"]).items()))
+        return ExtractionResult(row["document_sha256"], row["text_content"] or "", row["extractor"],
+                                row["extractor_version"], metadata, row["status"])
+
+    def record_extraction_issue(self, issue: ExtractionIssue, observed_at: str) -> None:
+        self._connection().execute(
+            "INSERT INTO processing_issues(relative_path,stage,code,message,recoverable,observed_at) VALUES(?,?,?,?,?,?) ON CONFLICT(relative_path,stage,code,message,recoverable) DO UPDATE SET observed_at=excluded.observed_at",
+            (issue.path, "extraction", issue.code, issue.message, int(issue.recoverable), observed_at),
+        )
 
     def get_document(self, sha256: str) -> StoredDocument | None:
         with self.connection() as connection:

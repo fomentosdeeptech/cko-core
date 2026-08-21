@@ -7,6 +7,9 @@ import hashlib
 import sqlite3
 
 SCHEMA_VERSION = 1
+# BEGIN IMMEDIATE serializes adapter writes; the repository updates by this
+# logical identity, so schema v1 needs no compatibility-breaking migration.
+EXTRACTION_IDENTITY_COLUMNS = ("document_sha256", "extractor", "extractor_version")
 
 
 class MigrationError(RuntimeError):
