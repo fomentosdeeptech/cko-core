@@ -80,6 +80,43 @@ def test_isolated_extraction_failure_returns_one(tmp_path: Path):
     assert code == 1 and not stderr and json.loads(stdout)["recoverable_failures"] == 1
     assert json.loads(invoke("search", "searchable", "--database", str(database), "--format", "json")[1])["total_matches"] == 1
 
+def test_late_unexpected_extraction_failure_preserves_search_and_recovers(monkeypatch, tmp_path: Path):
+    root = tmp_path / "root"; root.mkdir()
+    (root / "a-good.txt").write_text("indexed-before-failure", encoding="utf-8")
+    (root / "z-late.txt").write_text("sensitive-document-content", encoding="utf-8")
+    database = tmp_path / "db.sqlite"
+    real_registry = runtime.ExtractorRegistry()
+    failure_enabled = True
+
+    class FlakyRegistry:
+        def select(self, source):
+            if failure_enabled and source.relative_path == "z-late.txt":
+                raise RuntimeError("SELECT secret FROM documents: sensitive-document-content")
+            return real_registry.select(source)
+
+    monkeypatch.setattr(runtime, "ExtractorRegistry", FlakyRegistry)
+    code, stdout, stderr = invoke("ingest", str(root), "--database", str(database), "--format", "json")
+    assert code == 10 and not stdout and stderr == "error: internal failure\n"
+    assert "traceback" not in stderr.lower() and "select " not in stderr.lower()
+    assert "sensitive-document-content" not in stderr and "successful" not in stderr.lower()
+    with SQLiteDocumentRepository(database).connection() as connection:
+        assert connection.execute("SELECT count(*) FROM extractions").fetchone()[0] == 1
+        assert connection.execute("SELECT count(*) FROM search_index_documents").fetchone()[0] == 1
+        assert connection.execute("SELECT count(*) FROM search_fts").fetchone()[0] == 1
+    search_code, search_stdout, search_stderr = invoke(
+        "search", "indexed-before-failure", "--database", str(database), "--format", "json")
+    assert search_code == 0 and not search_stderr and json.loads(search_stdout)["total_matches"] == 1
+
+    failure_enabled = False
+    for _ in range(2):
+        code, stdout, stderr = invoke("ingest", str(root), "--database", str(database), "--format", "json")
+        assert code == 0 and not stderr and json.loads(stdout)["indexed_documents"] == 2
+    with SQLiteDocumentRepository(database).connection() as connection:
+        assert connection.execute("SELECT count(*) FROM extractions").fetchone()[0] == 2
+        assert connection.execute("SELECT count(*) FROM search_index_documents").fetchone()[0] == 2
+        assert connection.execute("SELECT count(*) FROM search_fts").fetchone()[0] == 2
+    assert json.loads(invoke("search", "sensitive-document-content", "--database", str(database), "--format", "json")[1])["total_matches"] == 1
+
 def test_text_json_unicode_newline_and_no_ansi(ingested):
     _, database, _ = ingested
     code, text, stderr = invoke("search", "café", "--database", str(database))

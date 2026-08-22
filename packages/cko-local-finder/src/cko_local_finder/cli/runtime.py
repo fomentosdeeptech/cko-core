@@ -51,8 +51,14 @@ def ingest(root: str, database: str, *, include_hidden: bool = False, follow_sym
     observed_at = _timestamp()
     discovery = run_discovery(source_root, DiscoveryPolicy(ignore_hidden=not include_hidden, follow_symlinks=follow_symlinks))
     persist_discovery_report(discovery, repository, observed_at=observed_at)
-    extraction = extract_documents(discovery.files, ExtractorRegistry(), repository, observed_at=observed_at)
-    indexing = index_documents(tuple(item.source_id for item in extraction.results), repository, observed_at=observed_at)
+    indexing = None
+    def index_persisted(results):
+        nonlocal indexing
+        indexing = index_documents(tuple(item.source_id for item in results), repository, observed_at=observed_at)
+    extraction = extract_documents(discovery.files, ExtractorRegistry(), repository, observed_at=observed_at,
+                                   on_results_persisted=index_persisted)
+    if indexing is None:
+        indexing = index_documents((), repository, observed_at=observed_at)
     report = build_ingestion_report(discovery.root, observed_at, repository)
     return IngestResult(discovery.root, str(Path(database).expanduser()), report.discovered_locations,
                         report.unique_documents, report.discovered_locations,
