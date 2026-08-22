@@ -1,13 +1,13 @@
 # CKO Local Knowledge Finder
 
-`cko-local-finder` is the independently installable, local-only document finder planned by GOV-010 and architecturally constrained by ADR-008. Version `0.1.0` includes the consolidated P-019-01 through P-019-08 capabilities and a unified CLI.
+`cko-local-finder` is the independently installable, local-only document finder planned by GOV-010 and architecturally constrained by ADR-008. Version `0.1.0` is the end-to-end validated SPR-019 MVP for a controlled local pilot.
 
 ## Status
 
 ```text
-STATUS: P-019-01 THROUGH P-019-08 IMPLEMENTED
+STATUS: SPR-019 IMPLEMENTED / VALIDATED / CONSOLIDATED
 VERSION: 0.1.0
-MVP_USABLE: NO
+MVP_USABLE: YES — CONTROLLED LOCAL PILOT ONLY
 P_019_01_STATUS: CONSOLIDATED
 P_019_02_STATUS: CONSOLIDATED
 P_019_03_STATUS: CONSOLIDATED
@@ -16,7 +16,7 @@ P_019_05_STATUS: CONSOLIDATED
 P_019_06_STATUS: CONSOLIDATED
 P_019_07_STATUS: CONSOLIDATED
 P_019_08_STATUS: CONSOLIDATED
-P_019_09_STATUS: PLANNED / NOT AUTHORIZED
+P_019_09_STATUS: IMPLEMENTED / VALIDATED / CONSOLIDATED
 ```
 
 The package is typed, depends directly only on `pypdf` and `python-docx`, and does not modify or extend the public API of the `cko` distribution.
@@ -70,7 +70,7 @@ cko-local-finder report duplicates --database C:\CKO\data\knowledge.db
 
 `search` supports `--extension`, `--media-type`, `--root`, `--path-prefix`, `--sha256`, and a limit from 1 through 100. All commands support stable human-readable `text` output and deterministic UTF-8 `json` output. Results go to stdout and safe diagnostics go to stderr.
 
-Hidden files are ignored unless `--include-hidden` is supplied. Symbolic links are not followed unless `--follow-symlinks` is supplied; root confinement remains mandatory in either mode. Source documents are always read-only.
+Hidden files are ignored unless `--include-hidden` is supplied. Symbolic links are never followed: the default ignores them and `--follow-symlinks` fails closed because that policy is not implemented. Root confinement remains mandatory. Source documents are always read-only.
 
 Exit codes are: `0` success, `1` ingestion completed with recoverable failures, `2` invalid usage or argument, `3` requested root/database/document not found, `4` database or migration failure, `5` required capability such as FTS5 unavailable, and `10` safely handled unexpected failure.
 
@@ -78,9 +78,25 @@ Exit codes are: `0` success, `1` ingestion completed with recoverable failures, 
 
 Processing is local: the CLI performs no network calls, telemetry, or hidden logging. Full document content is not printed. The SQLite database does contain extracted content and must be protected accordingly.
 
+## Controlled pilot procedure
+
+Begin with only 20–50 explicitly authorized, non-confidential documents in a dedicated folder. Create a Python 3.13+ virtual environment, install the validated wheel, and place the derived SQLite database in a protected directory outside both the source collection and every Git repository. Then run, in order:
+
+```text
+cko-local-finder ingest C:\Pilot\AuthorizedDocuments --database C:\PilotData\cko-finder.db --format json
+cko-local-finder search "known term" --database C:\PilotData\cko-finder.db --limit 20
+cko-local-finder show <64-character-sha256> --database C:\PilotData\cko-finder.db --format json
+cko-local-finder duplicates --database C:\PilotData\cko-finder.db --format json
+cko-local-finder report ingestion --root C:\Pilot\AuthorizedDocuments --database C:\PilotData\cko-finder.db --format json
+cko-local-finder report failures --database C:\PilotData\cko-finder.db --format json
+cko-local-finder report duplicates --database C:\PilotData\cko-finder.db --format json
+```
+
+Review provenance, duplicate locations, and every recoverable failure before relying on results. Do not use confidential, personal, regulated, or production documents in the initial pilot. Back up or delete the derived database according to the operator's local data-handling rules.
+
 ## Not implemented
 
-There is no OCR, semantic or vector search, RAG, remote access, watcher, GUI, or controlled human pilot. P-019-09 remains planned and not authorized; this increment does not declare final MVP readiness.
+There is no OCR, semantic or vector search, RAG, remote access, watcher, GUI, macro execution, or symlink traversal. Search is lexical FTS5, supported source formats are textual PDF, DOCX, UTF-8 TXT, and Markdown, and isolated corrupt/invalid files are reported rather than repaired. The readiness decision authorizes only a controlled local pilot; it is not approval for a public deployment, real confidential corpus, federation, or P-018-02.
 
 ## Development installation and tests
 
@@ -91,4 +107,4 @@ python -m pip install -e packages/cko-local-finder
 python -m pytest packages/cko-local-finder/tests
 ```
 
-These instructions exercise the package and CLI. They do not authorize P-019-09 or any later increment.
+These instructions exercise the package and CLI. They do not authorize P-018-02 or any later product increment.
