@@ -1,1 +1,1 @@
-"""Reserved namespace for future Local Knowledge Finder CLI composition."""
+"""Command-line composition boundary for the Local Knowledge Finder."""

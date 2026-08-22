@@ -1,11 +1,11 @@
 # CKO Local Knowledge Finder
 
-`cko-local-finder` is the independently installable package planned by GOV-010 and architecturally constrained by ADR-008. Version `0.1.0` includes the consolidated P-019-01 through P-019-07 internal capabilities.
+`cko-local-finder` is the independently installable, local-only document finder planned by GOV-010 and architecturally constrained by ADR-008. Version `0.1.0` includes the consolidated P-019-01 through P-019-08 capabilities and a unified CLI.
 
 ## Status
 
 ```text
-STATUS: P-019-01 THROUGH P-019-07 IMPLEMENTED
+STATUS: P-019-01 THROUGH P-019-08 IMPLEMENTED
 VERSION: 0.1.0
 MVP_USABLE: NO
 P_019_01_STATUS: CONSOLIDATED
@@ -15,7 +15,8 @@ P_019_04_STATUS: CONSOLIDATED
 P_019_05_STATUS: CONSOLIDATED
 P_019_06_STATUS: CONSOLIDATED
 P_019_07_STATUS: CONSOLIDATED
-P_019_08_AUTHORIZED: NO
+P_019_08_STATUS: CONSOLIDATED
+P_019_09_STATUS: PLANNED / NOT AUTHORIZED
 ```
 
 The package is typed, depends directly only on `pypdf` and `python-docx`, and does not modify or extend the public API of the `cko` distribution.
@@ -25,7 +26,7 @@ The package is typed, depends directly only on `pypdf` and `python-docx`, and do
 - `cko_local_finder.domain`: immutable, technology-neutral contract models.
 - `cko_local_finder.application`: abstract ports plus discovery, extraction, indexing, rebuild, and search orchestration.
 - `cko_local_finder.infrastructure`: confined discovery, extraction, SQLite persistence, and safe FTS5 search execution.
-- `cko_local_finder.cli`: reserved namespace for future CLI composition; currently empty and has no entry point.
+- `cko_local_finder.cli`: argparse parsing, adapter composition, presentation, and exit codes.
 
 The root package exposes only `__version__`. Domain models and application ports must be imported from their owning modules.
 
@@ -41,9 +42,45 @@ Schema version 3 preserves optional document SHA-256 and authorized root on proc
 
 Internal ingestion, failure, and duplicate reports are typed values serializable to deterministic UTF-8 JSON with sorted keys and an explicit caller-supplied timestamp. Pure declarative mappings describe the correspondence to `core.documents` and `core.provenance`; the package neither imports nor writes to CKO Core.
 
+## Installation and help
+
+Install the wheel in a Python 3.13 or newer virtual environment. The installation provides one executable:
+
+```text
+python -m pip install cko_local_finder-0.1.0-py3-none-any.whl
+cko-local-finder --help
+cko-local-finder --version
+```
+
+Every persistent command requires an explicit `--database PATH`. Ingest creates the database when its parent directory exists; read commands require an existing database. The database contains derived extracted text and should be stored outside the source collection and never committed to Git.
+
+## Commands
+
+Windows examples:
+
+```text
+cko-local-finder ingest C:\Documents\Knowledge --database C:\CKO\data\knowledge.db
+cko-local-finder search "project evidence" --database C:\CKO\data\knowledge.db --limit 20
+cko-local-finder show 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef --database C:\CKO\data\knowledge.db
+cko-local-finder duplicates --database C:\CKO\data\knowledge.db
+cko-local-finder report ingestion --root C:\Documents\Knowledge --database C:\CKO\data\knowledge.db
+cko-local-finder report failures --database C:\CKO\data\knowledge.db --format json
+cko-local-finder report duplicates --database C:\CKO\data\knowledge.db
+```
+
+`search` supports `--extension`, `--media-type`, `--root`, `--path-prefix`, `--sha256`, and a limit from 1 through 100. All commands support stable human-readable `text` output and deterministic UTF-8 `json` output. Results go to stdout and safe diagnostics go to stderr.
+
+Hidden files are ignored unless `--include-hidden` is supplied. Symbolic links are not followed unless `--follow-symlinks` is supplied; root confinement remains mandatory in either mode. Source documents are always read-only.
+
+Exit codes are: `0` success, `1` ingestion completed with recoverable failures, `2` invalid usage or argument, `3` requested root/database/document not found, `4` database or migration failure, `5` required capability such as FTS5 unavailable, and `10` safely handled unexpected failure.
+
+## Privacy and MVP limitations
+
+Processing is local: the CLI performs no network calls, telemetry, or hidden logging. Full document content is not printed. The SQLite database does contain extracted content and must be protected accordingly.
+
 ## Not implemented
 
-There is no OCR, functional CLI, semantic or vector search, RAG, remote access, or final-user workflow. The product is not ready for end use, and P-019-08 is not authorized.
+There is no OCR, semantic or vector search, RAG, remote access, watcher, GUI, or controlled human pilot. P-019-09 remains planned and not authorized; this increment does not declare final MVP readiness.
 
 ## Development installation and tests
 
@@ -54,4 +91,4 @@ python -m pip install -e packages/cko-local-finder
 python -m pytest packages/cko-local-finder/tests
 ```
 
-These instructions exercise internal package capabilities only. They do not make the MVP usable and do not authorize P-019-08 or any later increment.
+These instructions exercise the package and CLI. They do not authorize P-019-09 or any later increment.

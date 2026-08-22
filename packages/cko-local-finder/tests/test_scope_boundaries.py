@@ -20,6 +20,7 @@ def test_production_remains_contract_skeleton() -> None:
     expected = {
         "__init__.py", "application/__init__.py", "application/ports.py",
         "cli/__init__.py", "domain/__init__.py", "domain/models.py",
+        "cli/main.py", "cli/runtime.py", "cli/presenters.py",
         "application/discovery.py", "application/duplicates.py",
         "application/persistence.py",
         "application/extraction.py",
@@ -75,6 +76,6 @@ def test_p01903_scope_and_root_api_remain_narrow() -> None:
 
     assert cko_local_finder.__all__ == ("__version__",)
     production = "\n".join(path.read_text(encoding="utf-8").lower() for path in _production_sources())
-    for forbidden in ("pytesseract", "argparse", "embedding", "vector", "requests", "httpx"):
+    for forbidden in ("pytesseract", "embedding", "vector", "requests", "httpx"):
         assert forbidden not in production
     assert not any((PRODUCTION_ROOT / "infrastructure").glob("*persist*"))

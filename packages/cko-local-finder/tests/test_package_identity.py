@@ -4,6 +4,7 @@ import ast
 import importlib.resources
 from pathlib import Path
 import sys
+import tomllib
 
 import cko_local_finder
 
@@ -16,6 +17,13 @@ def test_package_identity_and_public_api() -> None:
     assert cko_local_finder.__version__ == "0.1.0"
     assert cko_local_finder.__all__ == ("__version__",)
     assert set(cko_local_finder.__all__) == {"__version__"}
+
+
+def test_single_installed_entry_point_metadata() -> None:
+    metadata = tomllib.loads((PROJECT / "pyproject.toml").read_text(encoding="utf-8"))
+    assert metadata["project"]["scripts"] == {
+        "cko-local-finder": "cko_local_finder.cli.main:main"
+    }
 
 
 def test_typed_package_marker_is_packaged() -> None:

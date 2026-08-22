@@ -8,7 +8,7 @@ PRODUCT: CKO Local Knowledge Finder
 DISTRIBUTION: cko-local-finder
 IMPORT_NAMESPACE: cko_local_finder
 EXPECTED_PACKAGE_LOCATION: packages/cko-local-finder/
-SPRINT_STATUS: IN_PROGRESS / P-019-01 THROUGH P-019-07 CONSOLIDATED
+SPRINT_STATUS: IN_PROGRESS / P-019-01 THROUGH P-019-08 CONSOLIDATED
 IMPLEMENTATION_AUTHORIZATION: INCREMENT_SPECIFIC_ONLY
 ```
 
@@ -117,10 +117,12 @@ Validation evidence: [P-019-07 Provenance and Reporting Validation Report](SPR-0
 ### P-019-08 — Unified CLI
 
 ```text
-P_019_08_STATUS: PLANNED / NOT AUTHORIZED
+P_019_08_STATUS: IMPLEMENTED / VALIDATED / CONSOLIDATED
 ```
 
 Plan the future `ingest`, `search`, `show`, `duplicates`, and `report` commands, including arguments, stdout, stderr, and exit codes. The CLI will orchestrate use cases and contain no business rules.
+
+Validation evidence: [P-019-08 Unified CLI Validation Report](SPR-019_P-019-08_UNIFIED_CLI_VALIDATION_REPORT.md).
 
 ### P-019-09 — End-to-End Validation and MVP Readiness
 
@@ -144,7 +146,7 @@ P-019-01
 → P-019-09
 ```
 
-No increment may begin through dependency implication. Each requires its own explicit human mandate; the first possible future authorization must address only `P-019-08`.
+No increment may begin through dependency implication. Each requires its own explicit human mandate; the first possible future authorization must address only `P-019-09`.
 
 ## 5. Permanent gates
 
@@ -192,7 +194,7 @@ P_019_04_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
 P_019_05_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
 P_019_06_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
 P_019_07_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
-P_019_08_AUTHORIZED: NO
+P_019_08_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
 P_019_09_AUTHORIZED: NO
 P_018_02_AUTHORIZED: NO
 ```
