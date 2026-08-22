@@ -23,6 +23,10 @@ from cko_local_finder.domain.models import (
     SourceFile,
     StoredDocument,
     StoredLocation,
+    ProvenanceBundle,
+    FailureReport,
+    DuplicateReport,
+    IngestionReport,
 )
 
 
@@ -83,6 +87,16 @@ class SearchIndexPort(Protocol):
 
 
 class ProvenancePort(Protocol):
-    """Record future source and extraction provenance."""
+    """Read explainable provenance and deterministic reports."""
 
-    def record(self, source: SourceFile, extraction: ExtractionResult) -> None: ...
+    def apply_provenance_migrations(self) -> int: ...
+
+    def provenance_by_sha256(self, sha256: str) -> ProvenanceBundle | None: ...
+
+    def provenance_by_location(self, root: str, relative_path: str) -> ProvenanceBundle | None: ...
+
+    def ingestion_report(self, root: str, observed_at: str) -> IngestionReport: ...
+
+    def failure_report(self, root: str | None, observed_at: str) -> FailureReport: ...
+
+    def duplicate_report(self, root: str | None, observed_at: str) -> DuplicateReport: ...

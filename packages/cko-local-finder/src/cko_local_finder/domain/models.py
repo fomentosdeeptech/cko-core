@@ -157,6 +157,117 @@ class SearchIndexStatus:
 
 
 @dataclass(frozen=True, slots=True)
+class DocumentOrigin:
+    root: str
+    relative_path: str
+    observed_size_bytes: int
+    mtime_ns: int
+
+
+@dataclass(frozen=True, slots=True)
+class ExtractionProvenance:
+    extractor: str
+    extractor_version: str
+    status: str
+    observed_at: str
+
+
+@dataclass(frozen=True, slots=True)
+class IndexingProvenance:
+    indexed: bool
+    indexed_at: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class ProcessingIssueRecord:
+    document_sha256: str | None
+    root: str | None
+    relative_path: str
+    stage: str
+    code: str
+    message: str
+    recoverable: bool
+    observed_at: str
+
+
+@dataclass(frozen=True, slots=True)
+class DuplicateEvidence:
+    sha256: str
+    origins: tuple[DocumentOrigin, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class DocumentProvenance:
+    sha256: str
+    size_bytes: int
+    extension: str
+    media_type: str
+    origins: tuple[DocumentOrigin, ...]
+    extraction: ExtractionProvenance | None
+    indexing: IndexingProvenance
+    issues: tuple[ProcessingIssueRecord, ...]
+    duplicate: DuplicateEvidence | None
+
+
+@dataclass(frozen=True, slots=True)
+class ProvenanceBundle:
+    document: DocumentProvenance
+    unresolved_historical_issues: tuple[ProcessingIssueRecord, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class ReportMetadata:
+    root: str | None
+    observed_at: str
+
+
+@dataclass(frozen=True, slots=True)
+class IngestionReport:
+    metadata: ReportMetadata
+    discovered_locations: int
+    unique_documents: int
+    new_documents: int
+    known_documents: int
+    successful_extractions: int
+    no_text_extractions: int
+    recoverable_failures: int
+    indexed_documents: int
+    duplicate_groups: int
+    duplicate_locations: int
+
+
+@dataclass(frozen=True, slots=True)
+class FailureReport:
+    metadata: ReportMetadata
+    issues: tuple[ProcessingIssueRecord, ...]
+    unresolved_historical_issues: tuple[ProcessingIssueRecord, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class DuplicateReport:
+    metadata: ReportMetadata
+    duplicates: tuple[DuplicateEvidence, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class CoreDocumentMapping:
+    identity: str
+    document_type: str
+    size_bytes: int
+    locations: tuple[tuple[str, str], ...]
+
+
+@dataclass(frozen=True, slots=True)
+class CoreProvenanceMapping:
+    document_identity: str
+    source_locations: tuple[tuple[str, str], ...]
+    extraction_status: str | None
+    derived_content_relation: str | None
+    issue_codes: tuple[str, ...]
+    duplicate_location_count: int
+
+
+@dataclass(frozen=True, slots=True)
 class ProcessingError:
     """Structured description of an isolated future processing failure."""
 

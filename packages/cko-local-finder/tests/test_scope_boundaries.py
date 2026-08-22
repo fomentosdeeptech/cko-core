@@ -24,11 +24,13 @@ def test_production_remains_contract_skeleton() -> None:
         "application/persistence.py",
         "application/extraction.py",
         "application/indexing.py", "application/search.py",
+        "application/provenance.py", "application/reporting.py", "application/core_mapping.py",
         "infrastructure/__init__.py", "infrastructure/filesystem.py",
         "infrastructure/hashing.py", "infrastructure/migrations.py",
         "infrastructure/sqlite.py",
         "infrastructure/extractors.py", "infrastructure/text.py",
         "infrastructure/search.py",
+        "infrastructure/reporting.py",
     }
     actual = {path.relative_to(PRODUCTION_ROOT).as_posix() for path in _production_sources()}
     assert actual == expected

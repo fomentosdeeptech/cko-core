@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import hashlib
 import sqlite3
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 # BEGIN IMMEDIATE serializes adapter writes; the repository updates by this
 # logical identity, so schema v1 needs no compatibility-breaking migration.
 EXTRACTION_IDENTITY_COLUMNS = ("document_sha256", "extractor", "extractor_version")
@@ -89,6 +89,12 @@ MIGRATIONS = (
             INSERT INTO search_fts(rowid,title,body) VALUES(new.id,new.title,new.body);
         END""",
         "CREATE INDEX idx_search_projection_filters ON search_index_documents(extension,media_type,root,relative_path)",
+    )),
+    Migration(3, "processing_issue_identity", (
+        "ALTER TABLE processing_issues ADD COLUMN document_sha256 TEXT NULL REFERENCES documents(sha256)",
+        "ALTER TABLE processing_issues ADD COLUMN root TEXT NULL",
+        "CREATE INDEX idx_processing_issues_document ON processing_issues(document_sha256)",
+        "CREATE INDEX idx_processing_issues_location ON processing_issues(root,relative_path)",
     )),
 )
 

@@ -8,7 +8,7 @@ PRODUCT: CKO Local Knowledge Finder
 DISTRIBUTION: cko-local-finder
 IMPORT_NAMESPACE: cko_local_finder
 EXPECTED_PACKAGE_LOCATION: packages/cko-local-finder/
-SPRINT_STATUS: IN_PROGRESS / P-019-01 THROUGH P-019-06 CONSOLIDATED
+SPRINT_STATUS: IN_PROGRESS / P-019-01 THROUGH P-019-07 CONSOLIDATED
 IMPLEMENTATION_AUTHORIZATION: INCREMENT_SPECIFIC_ONLY
 ```
 
@@ -107,10 +107,12 @@ Validation evidence: [P-019-06 Text Index, Search, Ranking and Snippets Validati
 ### P-019-07 — Provenance and Reporting
 
 ```text
-P_019_07_STATUS: PLANNED / NOT AUTHORIZED
+P_019_07_STATUS: IMPLEMENTED / VALIDATED / CONSOLIDATED
 ```
 
 Plan provenance for origin, hash, location, and extraction process; define the minimum mapping to `core.documents` and `core.provenance`; and specify ingestion, failure, and duplication reports without changing the Core.
+
+Validation evidence: [P-019-07 Provenance and Reporting Validation Report](SPR-019_P-019-07_PROVENANCE_REPORTING_VALIDATION_REPORT.md).
 
 ### P-019-08 — Unified CLI
 
@@ -142,7 +144,7 @@ P-019-01
 → P-019-09
 ```
 
-No increment may begin through dependency implication. Each requires its own explicit human mandate; the first possible future authorization must address only `P-019-07`.
+No increment may begin through dependency implication. Each requires its own explicit human mandate; the first possible future authorization must address only `P-019-08`.
 
 ## 5. Permanent gates
 
@@ -189,7 +191,7 @@ P_019_03_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
 P_019_04_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
 P_019_05_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
 P_019_06_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
-P_019_07_AUTHORIZED: NO
+P_019_07_AUTHORIZED: YES — COMPLETED BY SEPARATE HUMAN COMMAND
 P_019_08_AUTHORIZED: NO
 P_019_09_AUTHORIZED: NO
 P_018_02_AUTHORIZED: NO

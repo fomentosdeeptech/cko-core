@@ -12,6 +12,9 @@ from cko_local_finder.domain.models import (
     DatabaseCapability, DiscoveryIssue, DiscoveryReport, DuplicateGroup,
     ExtractionIssue, ExtractionResult, IndexingSummary, PersistenceSummary, SearchIndexStatus,
     SearchPage, SearchQuery, StoredDocument, StoredLocation,
+    DocumentOrigin, DocumentProvenance, DuplicateEvidence, ExtractionProvenance,
+    IndexingProvenance, ProcessingIssueRecord, ProvenanceBundle, ReportMetadata,
+    IngestionReport, FailureReport, DuplicateReport,
 )
 from cko_local_finder.infrastructure.migrations import MIGRATIONS, apply_migrations
 from cko_local_finder.infrastructure.search import execute_search
@@ -69,7 +72,7 @@ class SQLiteDocumentRepository:
         try:
             with self.connection() as connection:
                 current = int(connection.execute("PRAGMA user_version").fetchone()[0])
-                if current == 2:
+                if current in (2, 3):
                     return current
                 return apply_migrations(connection, MIGRATIONS[:1])
         except sqlite3.Error as exc:
@@ -78,9 +81,16 @@ class SQLiteDocumentRepository:
     def apply_search_migrations(self) -> int:
         try:
             with self.connection() as connection:
-                return apply_migrations(connection, MIGRATIONS)
+                current = int(connection.execute("PRAGMA user_version").fetchone()[0])
+                if current == 3:
+                    return current
+                return apply_migrations(connection, MIGRATIONS[:2])
         except sqlite3.Error as exc:
             raise RepositoryError("database operation failed") from exc
+
+    def apply_provenance_migrations(self) -> int:
+        with self.connection() as connection:
+            return apply_migrations(connection, MIGRATIONS)
 
     @contextmanager
     def transaction(self) -> Iterator[None]:
@@ -138,16 +148,24 @@ class SQLiteDocumentRepository:
                 )
                 locations_inserted += 1
         for issue in report.issues:
-            if self.record_issue(issue, observed_at):
+            if self.record_issue(issue, observed_at, root=report.root):
                 issues_recorded += 1
         version = int(connection.execute("PRAGMA user_version").fetchone()[0])
         return PersistenceSummary(documents_inserted, documents_updated, locations_inserted, locations_updated, issues_recorded, version)
 
-    def record_issue(self, issue: DiscoveryIssue, observed_at: str) -> bool:
-        cursor = self._connection().execute(
-            "INSERT INTO processing_issues(relative_path,stage,code,message,recoverable,observed_at) VALUES(?,?,?,?,?,?) ON CONFLICT(relative_path,stage,code,message,recoverable) DO UPDATE SET observed_at=excluded.observed_at",
-            (issue.path, issue.stage, issue.code, issue.message, int(issue.recoverable), observed_at),
-        )
+    def record_issue(self, issue: DiscoveryIssue, observed_at: str, *, root: str | None = None) -> bool:
+        connection = self._connection()
+        columns = {row[1] for row in connection.execute("PRAGMA table_info(processing_issues)")}
+        if "root" in columns:
+            cursor = connection.execute(
+                "INSERT INTO processing_issues(relative_path,stage,code,message,recoverable,observed_at,root) VALUES(?,?,?,?,?,?,?) ON CONFLICT(relative_path,stage,code,message,recoverable) DO UPDATE SET observed_at=excluded.observed_at,root=excluded.root",
+                (issue.path, issue.stage, issue.code, issue.message, int(issue.recoverable), observed_at, root),
+            )
+        else:
+            cursor = connection.execute(
+                "INSERT INTO processing_issues(relative_path,stage,code,message,recoverable,observed_at) VALUES(?,?,?,?,?,?) ON CONFLICT(relative_path,stage,code,message,recoverable) DO UPDATE SET observed_at=excluded.observed_at",
+                (issue.path, issue.stage, issue.code, issue.message, int(issue.recoverable), observed_at),
+            )
         return cursor.rowcount == 1
 
     def save_extraction(self, result: ExtractionResult, observed_at: str) -> None:
@@ -183,10 +201,23 @@ class SQLiteDocumentRepository:
                                 row["extractor_version"], metadata, row["status"])
 
     def record_extraction_issue(self, issue: ExtractionIssue, observed_at: str) -> None:
-        self._connection().execute(
-            "INSERT INTO processing_issues(relative_path,stage,code,message,recoverable,observed_at) VALUES(?,?,?,?,?,?) ON CONFLICT(relative_path,stage,code,message,recoverable) DO UPDATE SET observed_at=excluded.observed_at",
-            (issue.path, "extraction", issue.code, issue.message, int(issue.recoverable), observed_at),
-        )
+        connection = self._connection()
+        columns = {row[1] for row in connection.execute("PRAGMA table_info(processing_issues)")}
+        if "document_sha256" in columns:
+            location = connection.execute(
+                "SELECT root FROM document_locations WHERE document_sha256=? AND relative_path=? ORDER BY root LIMIT 1",
+                (issue.source_id, issue.path),
+            ).fetchone()
+            connection.execute(
+                "INSERT INTO processing_issues(relative_path,stage,code,message,recoverable,observed_at,document_sha256,root) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(relative_path,stage,code,message,recoverable) DO UPDATE SET observed_at=excluded.observed_at,document_sha256=excluded.document_sha256,root=excluded.root",
+                (issue.path, "extraction", issue.code, issue.message, int(issue.recoverable), observed_at,
+                 issue.source_id, location["root"] if location else None),
+            )
+        else:
+            connection.execute(
+                "INSERT INTO processing_issues(relative_path,stage,code,message,recoverable,observed_at) VALUES(?,?,?,?,?,?) ON CONFLICT(relative_path,stage,code,message,recoverable) DO UPDATE SET observed_at=excluded.observed_at",
+                (issue.path, "extraction", issue.code, issue.message, int(issue.recoverable), observed_at),
+            )
 
     def get_document(self, sha256: str) -> StoredDocument | None:
         with self.connection() as connection:
@@ -297,4 +328,92 @@ class SQLiteDocumentRepository:
             ).fetchone()
             count = connection.execute("SELECT count(*) FROM search_index_documents").fetchone()[0] if exists else 0
         return SearchIndexStatus(capability.fts5_available, int(count), capability.schema_version,
-                                 capability.schema_version != 2)
+                                 capability.schema_version not in (2, 3))
+
+    @staticmethod
+    def _issue(row: sqlite3.Row) -> ProcessingIssueRecord:
+        return ProcessingIssueRecord(row["document_sha256"], row["root"], row["relative_path"],
+                                     row["stage"], row["code"], row["message"],
+                                     bool(row["recoverable"]), row["observed_at"])
+
+    def provenance_by_sha256(self, sha256: str) -> ProvenanceBundle | None:
+        with self.connection() as connection:
+            document = connection.execute("SELECT * FROM documents WHERE sha256=?", (sha256,)).fetchone()
+            if document is None:
+                return None
+            location_rows = connection.execute(
+                "SELECT * FROM document_locations WHERE document_sha256=? ORDER BY root,relative_path COLLATE NOCASE,relative_path",
+                (sha256,),
+            ).fetchall()
+            origins = tuple(DocumentOrigin(row["root"], row["relative_path"], row["observed_size_bytes"], row["mtime_ns"])
+                            for row in location_rows)
+            extraction_row = connection.execute(
+                "SELECT * FROM extractions WHERE document_sha256=? ORDER BY id DESC LIMIT 1", (sha256,)
+            ).fetchone()
+            extraction = None if extraction_row is None else ExtractionProvenance(
+                extraction_row["extractor"], extraction_row["extractor_version"],
+                extraction_row["status"], extraction_row["observed_at"])
+            indexed_row = connection.execute(
+                "SELECT indexed_at FROM search_index_documents WHERE document_sha256=?", (sha256,)
+            ).fetchone()
+            indexing = IndexingProvenance(indexed_row is not None, indexed_row["indexed_at"] if indexed_row else None)
+            issues = tuple(self._issue(row) for row in connection.execute(
+                "SELECT * FROM processing_issues WHERE document_sha256=? ORDER BY observed_at,stage,code,root,relative_path",
+                (sha256,),
+            ))
+            unresolved = tuple(self._issue(row) for row in connection.execute(
+                "SELECT * FROM processing_issues WHERE document_sha256 IS NULL ORDER BY observed_at,stage,code,coalesce(root,''),relative_path"
+            ))
+        duplicate = DuplicateEvidence(sha256, origins) if len(origins) >= 2 else None
+        provenance = DocumentProvenance(sha256, document["size_bytes"], document["extension"],
+                                        document["media_type"], origins, extraction, indexing, issues, duplicate)
+        return ProvenanceBundle(provenance, unresolved)
+
+    def provenance_by_location(self, root: str, relative_path: str) -> ProvenanceBundle | None:
+        relative = PurePosixPath(relative_path)
+        if relative.is_absolute() or ".." in relative.parts:
+            raise ValueError("relative_path must remain confined")
+        with self.connection() as connection:
+            row = connection.execute(
+                "SELECT document_sha256 FROM document_locations WHERE root=? AND relative_path=?",
+                (root, relative.as_posix()),
+            ).fetchone()
+        return None if row is None else self.provenance_by_sha256(row["document_sha256"])
+
+    def ingestion_report(self, root: str, observed_at: str) -> IngestionReport:
+        with self.connection() as connection:
+            locations = connection.execute("SELECT count(*) FROM document_locations WHERE root=?", (root,)).fetchone()[0]
+            unique = connection.execute("SELECT count(DISTINCT document_sha256) FROM document_locations WHERE root=?", (root,)).fetchone()[0]
+            successful = connection.execute("SELECT count(DISTINCT e.document_sha256) FROM extractions e JOIN document_locations l ON l.document_sha256=e.document_sha256 WHERE l.root=? AND e.status='SUCCESS'", (root,)).fetchone()[0]
+            no_text = connection.execute("SELECT count(DISTINCT e.document_sha256) FROM extractions e JOIN document_locations l ON l.document_sha256=e.document_sha256 WHERE l.root=? AND e.status='NO_TEXT'", (root,)).fetchone()[0]
+            failures = connection.execute("SELECT count(*) FROM processing_issues WHERE root=? AND recoverable=1", (root,)).fetchone()[0]
+            indexed = connection.execute("SELECT count(DISTINCT s.document_sha256) FROM search_index_documents s JOIN document_locations l ON l.document_sha256=s.document_sha256 WHERE l.root=?", (root,)).fetchone()[0]
+            duplicate_rows = connection.execute("SELECT count(*) locations FROM document_locations GROUP BY document_sha256 HAVING count(*)>1").fetchall()
+        return IngestionReport(ReportMetadata(root, observed_at), locations, unique, unique, 0, successful,
+                               no_text, failures, indexed, len(duplicate_rows), sum(row[0] for row in duplicate_rows))
+
+    def failure_report(self, root: str | None, observed_at: str) -> FailureReport:
+        with self.connection() as connection:
+            resolved_sql = "SELECT * FROM processing_issues WHERE document_sha256 IS NOT NULL"
+            params: tuple[object, ...] = ()
+            if root is not None:
+                resolved_sql += " AND root=?"; params = (root,)
+            resolved_sql += " ORDER BY observed_at,stage,code,document_sha256,relative_path"
+            resolved = tuple(self._issue(row) for row in connection.execute(resolved_sql, params))
+            unresolved = tuple(self._issue(row) for row in connection.execute(
+                "SELECT * FROM processing_issues WHERE document_sha256 IS NULL ORDER BY observed_at,stage,code,coalesce(root,''),relative_path"))
+        return FailureReport(ReportMetadata(root, observed_at), resolved, unresolved)
+
+    def duplicate_report(self, root: str | None, observed_at: str) -> DuplicateReport:
+        with self.connection() as connection:
+            rows = connection.execute(
+                "SELECT * FROM document_locations WHERE document_sha256 IN (SELECT document_sha256 FROM document_locations GROUP BY document_sha256 HAVING count(*)>1) ORDER BY document_sha256,root,relative_path COLLATE NOCASE,relative_path"
+            ).fetchall()
+        groups: dict[str, list[DocumentOrigin]] = {}
+        for row in rows:
+            if root is None or row["root"] == root:
+                groups.setdefault(row["document_sha256"], []).append(DocumentOrigin(
+                    row["root"], row["relative_path"], row["observed_size_bytes"], row["mtime_ns"]))
+        duplicates = tuple(DuplicateEvidence(digest, tuple(origins)) for digest, origins in sorted(groups.items())
+                           if len(origins) >= 2 or root is None)
+        return DuplicateReport(ReportMetadata(root, observed_at), duplicates)

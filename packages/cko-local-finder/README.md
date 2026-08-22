@@ -1,11 +1,11 @@
 # CKO Local Knowledge Finder
 
-`cko-local-finder` is the independently installable package planned by GOV-010 and architecturally constrained by ADR-008. Version `0.1.0` includes the consolidated P-019-01 through P-019-06 internal capabilities.
+`cko-local-finder` is the independently installable package planned by GOV-010 and architecturally constrained by ADR-008. Version `0.1.0` includes the consolidated P-019-01 through P-019-07 internal capabilities.
 
 ## Status
 
 ```text
-STATUS: P-019-01 THROUGH P-019-06 IMPLEMENTED
+STATUS: P-019-01 THROUGH P-019-07 IMPLEMENTED
 VERSION: 0.1.0
 MVP_USABLE: NO
 P_019_01_STATUS: CONSOLIDATED
@@ -14,7 +14,8 @@ P_019_03_STATUS: CONSOLIDATED
 P_019_04_STATUS: CONSOLIDATED
 P_019_05_STATUS: CONSOLIDATED
 P_019_06_STATUS: CONSOLIDATED
-P_019_07_AUTHORIZED: NO
+P_019_07_STATUS: CONSOLIDATED
+P_019_08_AUTHORIZED: NO
 ```
 
 The package is typed, depends directly only on `pypdf` and `python-docx`, and does not modify or extend the public API of the `cko` distribution.
@@ -36,9 +37,13 @@ Internal text extraction supports UTF-8 TXT, UTF-8 Markdown, textual PDF through
 
 Schema version 2 adds one persistent FTS5 table using `unicode61 remove_diacritics 2`, a derived index projection, strict synchronization triggers, idempotent reindexing, and full rebuild from persisted state without rereading source files. Internal text search uses literal parameterized queries, BM25 ranking with deterministic tie-breaking, bounded highlighted snippets, pagination, and explicit extension, media type, root, relative-path prefix, and SHA-256 filters.
 
+Schema version 3 preserves optional document SHA-256 and authorized root on processing issues. Provenance joins SHA-256 identity to every known relative location, extraction, indexing, issues, and duplicate evidence without using absolute paths as identity. Historical issues whose origin cannot be proved remain explicitly unresolved rather than being guessed.
+
+Internal ingestion, failure, and duplicate reports are typed values serializable to deterministic UTF-8 JSON with sorted keys and an explicit caller-supplied timestamp. Pure declarative mappings describe the correspondence to `core.documents` and `core.provenance`; the package neither imports nor writes to CKO Core.
+
 ## Not implemented
 
-There is no OCR, functional CLI, semantic or vector search, RAG, remote access, or final-user workflow. The product is not ready for end use, and P-019-07 is not authorized.
+There is no OCR, functional CLI, semantic or vector search, RAG, remote access, or final-user workflow. The product is not ready for end use, and P-019-08 is not authorized.
 
 ## Development installation and tests
 
@@ -49,4 +54,4 @@ python -m pip install -e packages/cko-local-finder
 python -m pytest packages/cko-local-finder/tests
 ```
 
-These instructions exercise internal package capabilities only. They do not make the MVP usable and do not authorize P-019-07 or any later increment.
+These instructions exercise internal package capabilities only. They do not make the MVP usable and do not authorize P-019-08 or any later increment.
