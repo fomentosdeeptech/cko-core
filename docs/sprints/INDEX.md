@@ -12,7 +12,7 @@ This index is the canonical navigation and allocation register for the CKO Sprin
 - A Sprint number may be allocated only after consulting and atomically updating this index under explicit human authority.
 - Multiple reports, specifications, tests, or implementation records for one Sprint family are auxiliary evidence, not duplicate Sprint allocations.
 - Unless a status is explicitly evidenced below, the neutral classification is `HISTORICAL / STATUS NOT RECONCILED BY THIS OPERATION`.
-- Planning does not authorize implementation. Every SPR-019 increment requires a separate human mandate.
+- Planning does not authorize implementation. Every implementation increment requires a separate human mandate.
 
 ## Reconciliation summary
 
@@ -22,9 +22,10 @@ OBSERVED_SPRINT_NUMBERS: SPR-003–SPR-018
 LOWEST_OBSERVED_SPRINT_NUMBER: SPR-003
 HIGHEST_OBSERVED_SPRINT_NUMBER_BEFORE_THIS_INDEX: SPR-018
 HISTORICAL_SPRINT_GAPS: SPR-001 AND SPR-002 HAVE NO TRACKED PRIMARY ARTIFACT; NONE WITHIN SPR-003–SPR-018
-RESERVED_SPRINT_NUMBERS: SPR-001–SPR-019
+RESERVED_SPRINT_NUMBERS: SPR-001–SPR-020
 DUPLICATE_SPRINT_NUMBER_COUNT: 0
 SPR_019_COLLISION_STATUS: NONE
+SPR_020_COLLISION_STATUS: NONE — ALLOCATED BY DOC-PILOT-001
 ```
 
 `SPR-001` and `SPR-002` remain historically reserved pending a separate reconciliation; their absent primary artifacts do not make those numbers available. Qualified families observed in tracked names include `SPR-005A`, `SPR-006A`, `SPR-007B`, `SPR-008A` through `SPR-008W` (including `SPR-008OA`), `SPR-009A`, `SPR-017E`, `SPR-017G`, and the `P-018-*` increment family. These variants remain attached to their base number.
@@ -50,12 +51,13 @@ SPR_019_COLLISION_STATUS: NONE
 | SPR-017 | Historical Sprint family, including SPR-017E and SPR-017G | [Technical specification](../../SPR017_TECHNICAL_SPECIFICATION.md) | [Implementation report](../../SPR017_IMPLEMENTATION_REPORT.md), [homologation report](../../SPR017_HOMOLOGATION_REPORT.md), [audits and verification](../../SPR017G_VERIFICACAO_FINAL.md) | `HISTORICAL / STATUS NOT RECONCILED BY THIS OPERATION` |
 | SPR-018 | Cycle II Sprint and P-018 increment family | [Opening term](SPR-018_TERMO_DE_ABERTURA.md), [technical specification](SPR-018_TECHNICAL_SPECIFICATION.md) | [Readiness matrix](SPR-018_IMPLEMENTATION_READINESS_MATRIX.csv), [P-018-01 implementation report](SPR-018_P-018-01_IMPLEMENTATION_REPORT.md), related P-018-01 validation reports in this directory | `AUTHORIZED / TECHNICAL EXECUTION CONDITIONED`; `P-018-02: NOT AUTHORIZED` |
 | SPR-019 | CKO Local Knowledge Finder MVP Implementation | [Implementation plan](SPR-019_CKO_LOCAL_KNOWLEDGE_FINDER_MVP_IMPLEMENTATION_PLAN.md) | [P-019-01 validation report](SPR-019_P-019-01_PACKAGE_FOUNDATION_VALIDATION_REPORT.md); [P-019-02 validation report](SPR-019_P-019-02_SYNTHETIC_CORPUS_TEST_HARNESS_VALIDATION_REPORT.md); [P-019-03 validation report](SPR-019_P-019-03_SAFE_DISCOVERY_IDENTITY_DUPLICATE_DETECTION_VALIDATION_REPORT.md); [P-019-04 validation report](SPR-019_P-019-04_VERSIONED_SQLITE_PERSISTENCE_VALIDATION_REPORT.md); [P-019-05 validation report](SPR-019_P-019-05_DOCUMENT_EXTRACTION_VALIDATION_REPORT.md); [P-019-06 validation report](SPR-019_P-019-06_TEXT_INDEX_SEARCH_RANKING_SNIPPETS_VALIDATION_REPORT.md); [P-019-07 validation report](SPR-019_P-019-07_PROVENANCE_REPORTING_VALIDATION_REPORT.md); [P-019-08 validation report](SPR-019_P-019-08_UNIFIED_CLI_VALIDATION_REPORT.md); [P-019-09 readiness report](SPR-019_P-019-09_END_TO_END_MVP_READINESS_VALIDATION_REPORT.md); [REV-007 readiness review](../reviews/REV-007_CKO_LOCAL_KNOWLEDGE_FINDER_MVP_READINESS_REVIEW.md) | `COMPLETED / P-019-01 THROUGH P-019-09 CONSOLIDATED / READY FOR CONTROLLED LOCAL PILOT` |
+| SPR-020 | CKO Local Knowledge Finder Desktop Interface | [Desktop interface plan](SPR-020_CKO_LOCAL_KNOWLEDGE_FINDER_DESKTOP_INTERFACE_PLAN.md) | [REV-008 pilot recovery review](../reviews/REV-008_CKO_LOCAL_KNOWLEDGE_FINDER_PILOT_RECOVERY_REVIEW.md); local Windows GUI plan | `PLANNED / NOT AUTHORIZED FOR IMPLEMENTATION` |
 
 ## Next allocation
 
 ```text
-ALLOCATED_SPRINT_NUMBER: SPR-019
-NEXT_AVAILABLE_SPRINT_NUMBER_AFTER: SPR-020
+ALLOCATED_SPRINT_NUMBER: SPR-020
+NEXT_AVAILABLE_SPRINT_NUMBER_AFTER: SPR-021
 ```
 
-`SPR-020` is only the expected next number after this reconciliation. It is not allocated or authorized, and future allocation remains subject to an effective inventory and an atomic update of this index.
+`SPR-020` is allocated only as a plan for a local Windows graphical interface. Its implementation is not authorized; any implementation remains subject to an effective inventory, architectural authorization, a closed allowlist, and a separate human mandate.
