@@ -34,6 +34,9 @@ def test_entry_point_version_help_and_distribution_metadata() -> None:
     help_result = run_installed("--help")
     assert version.returncode == 0 and version.stdout == "cko-local-finder 0.1.0\n" and not version.stderr
     assert help_result.returncode == 0 and "ingest" in help_result.stdout and not help_result.stderr
+    gui_points = [item for item in importlib.metadata.entry_points(group="console_scripts")
+                  if item.name == "cko-local-finder-gui"]
+    assert len(gui_points) == 1 and gui_points[0].value == "cko_local_finder.gui.app:main"
 
 
 def test_installed_entry_point_executes_workflow(tmp_path: Path) -> None:

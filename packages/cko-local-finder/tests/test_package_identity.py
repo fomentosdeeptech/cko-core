@@ -19,10 +19,11 @@ def test_package_identity_and_public_api() -> None:
     assert set(cko_local_finder.__all__) == {"__version__"}
 
 
-def test_single_installed_entry_point_metadata() -> None:
+def test_cli_and_gui_entry_point_metadata() -> None:
     metadata = tomllib.loads((PROJECT / "pyproject.toml").read_text(encoding="utf-8"))
     assert metadata["project"]["scripts"] == {
-        "cko-local-finder": "cko_local_finder.cli.main:main"
+        "cko-local-finder": "cko_local_finder.cli.main:main",
+        "cko-local-finder-gui": "cko_local_finder.gui.app:main",
     }
 
 

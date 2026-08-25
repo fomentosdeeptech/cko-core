@@ -21,8 +21,8 @@ def _absolute_import_roots(path: Path) -> set[str]:
     return roots
 
 
-def test_four_architecture_namespaces_exist() -> None:
-    for name in ("domain", "application", "infrastructure", "cli"):
+def test_architecture_namespaces_exist() -> None:
+    for name in ("domain", "application", "infrastructure", "cli", "gui"):
         assert (SOURCE / name / "__init__.py").is_file()
 
 
@@ -43,7 +43,10 @@ def test_only_authorized_adapters_and_functional_cli() -> None:
         "__init__.py", "main.py", "runtime.py", "presenters.py",
     }
     metadata = tomllib.loads((PROJECT / "pyproject.toml").read_text(encoding="utf-8"))
-    assert metadata["project"]["scripts"] == {"cko-local-finder": "cko_local_finder.cli.main:main"}
+    assert metadata["project"]["scripts"] == {
+        "cko-local-finder": "cko_local_finder.cli.main:main",
+        "cko-local-finder-gui": "cko_local_finder.gui.app:main",
+    }
     assert metadata["project"]["dependencies"] == ["pypdf>=5,<7", "python-docx>=1.1,<2"]
 
 
@@ -68,3 +71,13 @@ def test_application_and_bootstrap_boundaries() -> None:
     facade = (SOURCE / "application" / "facade.py").read_text(encoding="utf-8")
     assert "sqlite" not in facade.lower()
     assert "presenter" not in facade.lower()
+
+
+def test_gui_is_a_presentation_only_adapter() -> None:
+    gui = SOURCE / "gui"
+    for path in gui.glob("*.py"):
+        text = path.read_text(encoding="utf-8").lower()
+        assert "cko_local_finder.cli" not in text
+        assert "cko_local_finder.infrastructure" not in text
+        assert "select " not in text and "pragma " not in text
+        assert "subprocess" not in text and "presenter" not in text

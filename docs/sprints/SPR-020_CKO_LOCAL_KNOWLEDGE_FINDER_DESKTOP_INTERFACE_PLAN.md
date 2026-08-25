@@ -288,3 +288,42 @@ dependente de autorização própria; `P-018-02` permanece não autorizado.
 ## 12. Gates para autorização futura
 
 Uma operação posterior deverá aprovar tecnologia, licença, allowlist e incrementos. Deverá preservar `SDK 1.0.0`, API pública `646 / 646 / 646` com fingerprint `d47d3fea99b5773ec2eb97fce56d8f542211fb3104951f61b93f5265b16f9232`, Local Finder `0.1.0`, schema SQLite `3`, privacidade, idempotência e `P-018-02: NOT AUTHORIZED`.
+
+## 13. Primeira interface funcional implementada — INC-GUI-001B
+
+O `INC-GUI-001B` implementou a primeira interface desktop funcional como adaptador
+Qt Widgets da fachada de aplicação e do composition root compartilhado. A janela única
+permite selecionar ou criar banco, retornar ao banco padrão obtido por
+`QStandardPaths.AppLocalDataLocation`, escolher uma origem, ingerir, pesquisar com
+filtros e paginação, consultar detalhes e visualizar relatórios de ingestão, falhas e
+duplicatas. A fachada recebeu somente o campo interno `SearchRequest.offset`, ao final
+do DTO, propagado ao contrato de busca existente.
+
+A ingestão usa um `QObject` movido para `QThread`; progresso, sucesso e falha retornam
+por sinais, os widgets permanecem na thread principal e uma segunda ingestão ou o
+fechamento durante trabalho ativo são bloqueados. Os 13 eventos existentes possuem
+mapeamento textual explícito. A barra é indeterminada durante o trabalho: não há
+percentual inventado, ETA ou cancelamento. Falhas inesperadas mostram somente
+`Falha interna.`, sem traceback, SQL ou conteúdo documental, enquanto sucessos
+anteriores permanecem indexados e pesquisáveis.
+
+PySide6 foi adicionado exclusivamente no extra opcional `gui` (`PySide6>=6.8.1,<7`) e
+o entry point `cko-local-finder-gui` falha de modo controlado sem esse extra. A instalação
+CLI-only, a instalação gráfica headless, ambos os entry points, `pip check`, wheel,
+sdist e coexistência com `cko` e `cko-fcp` foram validados. Dois wheels foram idênticos;
+os dois sdists tiveram os mesmos 90 membros e o mesmo digest lógico de conteúdo.
+
+Foram coletados 196 testes: `193 passed / 3 skipped / 0 failed`, sendo 11 testes novos
+sobre a baseline de 185. A validação cobriu threading real fora da GUI thread, sinais,
+cleanup, progresso, busca, filtros, paginação, detalhes, relatórios, estado vazio,
+sanitização e falha parcial tardia. Permanecem `SDK 1.0.0`, API pública
+`646 / 646 / 646`, fingerprint
+`d47d3fea99b5773ec2eb97fce56d8f542211fb3104951f61b93f5265b16f9232`, Local Finder
+`0.1.0`, API raiz somente `__version__`, duas dependências runtime e schema SQLite `3`.
+
+Nenhum documento-fonte foi movido, copiado, renomeado, excluído ou modificado; o
+piloto real não foi acessado. Não foram implementados QSettings, cancelamento,
+organização física ou virtual, OCR, busca semântica, assets, ícones, instalador ou
+executável standalone. O uso de PySide6 está limitado a desenvolvimento; a avaliação
+de licença e a distribuição pública continuam bloqueadas. `P-018-02` permanece não
+autorizado e este incremento não autoriza o próximo.

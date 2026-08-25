@@ -27,6 +27,7 @@ def test_production_remains_contract_skeleton() -> None:
         "application/indexing.py", "application/search.py",
         "application/provenance.py", "application/reporting.py", "application/core_mapping.py",
         "application/facade.py", "bootstrap.py",
+        "gui/__init__.py", "gui/app.py", "gui/main_window.py", "gui/workers.py",
         "infrastructure/__init__.py", "infrastructure/filesystem.py",
         "infrastructure/hashing.py", "infrastructure/migrations.py",
         "infrastructure/sqlite.py",
@@ -56,7 +57,9 @@ def test_no_forbidden_production_capabilities_or_imports() -> None:
 def test_only_authorized_runtime_dependencies_added() -> None:
     project = tomllib.loads((PACKAGE_ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
     assert project["dependencies"] == ["pypdf>=5,<7", "python-docx>=1.1,<2"]
-    assert project["optional-dependencies"] == {"test": ["pytest>=8,<9"]}
+    assert project["optional-dependencies"] == {
+        "test": ["pytest>=8,<9"], "gui": ["PySide6>=6.8.1,<7"],
+    }
 
 
 def test_importing_factory_creates_no_files(tmp_path: Path) -> None:

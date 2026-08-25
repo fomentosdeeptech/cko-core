@@ -81,6 +81,7 @@ class SearchRequest:
     root: str | None = None
     path_prefix: str | None = None
     sha256: str | None = None
+    offset: int = 0
 
 
 class ApplicationFacade:
@@ -158,7 +159,7 @@ class ApplicationFacade:
         repository.apply_provenance_migrations()  # type: ignore[union-attr]
         filters = SearchFilter(request.extension, request.media_type, request.root,
                                request.path_prefix, request.sha256)
-        return search_documents(SearchQuery(request.query, filters, request.limit), repository)  # type: ignore[arg-type]
+        return search_documents(SearchQuery(request.query, filters, request.limit, request.offset), repository)  # type: ignore[arg-type]
 
     def get_document_details(self, sha256: str, database: str) -> ProvenanceBundle:
         return provenance_for_sha256(sha256, self._repository(database, False))  # type: ignore[arg-type]
