@@ -2,7 +2,8 @@
 
 from cko_local_finder.application.ports import SearchIndexPort
 from cko_local_finder.domain.models import SearchPage, SearchQuery
-from cko_local_finder.infrastructure.search import MAX_QUERY_CHARACTERS, MAX_RESULT_LIMIT
+MAX_QUERY_CHARACTERS = 1000
+MAX_RESULT_LIMIT = 100
 
 
 def search_documents(query: SearchQuery, index: SearchIndexPort) -> SearchPage:

@@ -51,3 +51,20 @@ def test_distribution_isolated_from_core() -> None:
     metadata = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert "cko-local-finder" not in metadata["project"].get("dependencies", [])
     assert not (PROJECT / "src" / "cko").exists()
+
+
+def test_application_and_bootstrap_boundaries() -> None:
+    for path in (SOURCE / "application").glob("*.py"):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        modules = {
+            node.module for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom) and node.module
+        }
+        assert not any(".infrastructure" in module or ".cli" in module or ".gui" in module
+                       for module in modules)
+    bootstrap = (SOURCE / "bootstrap.py").read_text(encoding="utf-8")
+    assert "cko_local_finder.cli" not in bootstrap
+    assert "cko_local_finder.gui" not in bootstrap
+    facade = (SOURCE / "application" / "facade.py").read_text(encoding="utf-8")
+    assert "sqlite" not in facade.lower()
+    assert "presenter" not in facade.lower()

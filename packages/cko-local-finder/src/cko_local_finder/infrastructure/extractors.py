@@ -8,15 +8,13 @@ import zipfile
 from docx import Document
 from pypdf import PdfReader
 
+from cko_local_finder.application.extraction import RecoverableExtractionError
 from cko_local_finder.domain.models import DiscoveredFile, ExtractionPolicy, ExtractionResult
 from cko_local_finder.infrastructure.text import TextLimitError, normalize_text
 
 
-class ExtractionError(RuntimeError):
-    def __init__(self, code: str, message: str, *, observed_size: int | None = None) -> None:
-        super().__init__(message)
-        self.code = code
-        self.observed_size = observed_size
+class ExtractionError(RecoverableExtractionError):
+    """Recoverable adapter error with stable code and observed size."""
 
 
 class _BaseExtractor:

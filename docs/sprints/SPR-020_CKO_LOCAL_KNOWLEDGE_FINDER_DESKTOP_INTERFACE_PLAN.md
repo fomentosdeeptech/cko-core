@@ -268,6 +268,23 @@ Os caminhos abaixo são somente propostas e deverão ser reconciliados com a ár
 - Novo schema ou alteração da API pública do SDK.
 - Qualquer implementação nesta operação documental.
 
-## 11. Gates para autorização futura
+## 11. Fundação compartilhada implementada — INC-GUI-001A
 
-Uma operação posterior deverá aprovar tecnologia, licença, contratos da fachada, allowlist e incrementos. Deverá preservar `SDK 1.0.0`, API pública `646 / 646 / 646` com fingerprint `d47d3fea99b5773ec2eb97fce56d8f542211fb3104951f61b93f5265b16f9232`, Local Finder `0.1.0`, schema SQLite `3`, privacidade, idempotência e `P-018-02: NOT AUTHORIZED`.
+O `INC-GUI-001A` implementou a fachada interna tipada em `application/facade.py` e o
+composition root compartilhado em `bootstrap.py`. O CLI passou a ser um adaptador fino
+desse núcleo. A aplicação permanece independente de infraestrutura, CLI e apresentação;
+o bootstrap conhece apenas aplicação, domínio e adaptadores concretos.
+
+Foram introduzidos 13 eventos honestos de fronteira de etapa, sem percentuais, estimativas
+ou cancelamento. A extração preserva sucessos persistidos e os indexa no fechamento do
+lote mesmo quando uma falha inesperada posterior é propagada. Busca, proveniência,
+relatórios, duplicatas, idempotência, formatos e códigos de saída do CLI permanecem
+compatíveis.
+
+Este incremento não criou GUI, não adicionou PySide6, não alterou dependências,
+empacotamento, API pública, versão ou schema. A próxima implementação gráfica continua
+dependente de autorização própria; `P-018-02` permanece não autorizado.
+
+## 12. Gates para autorização futura
+
+Uma operação posterior deverá aprovar tecnologia, licença, allowlist e incrementos. Deverá preservar `SDK 1.0.0`, API pública `646 / 646 / 646` com fingerprint `d47d3fea99b5773ec2eb97fce56d8f542211fb3104951f61b93f5265b16f9232`, Local Finder `0.1.0`, schema SQLite `3`, privacidade, idempotência e `P-018-02: NOT AUTHORIZED`.

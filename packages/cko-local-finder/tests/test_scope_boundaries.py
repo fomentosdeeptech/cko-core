@@ -26,6 +26,7 @@ def test_production_remains_contract_skeleton() -> None:
         "application/extraction.py",
         "application/indexing.py", "application/search.py",
         "application/provenance.py", "application/reporting.py", "application/core_mapping.py",
+        "application/facade.py", "bootstrap.py",
         "infrastructure/__init__.py", "infrastructure/filesystem.py",
         "infrastructure/hashing.py", "infrastructure/migrations.py",
         "infrastructure/sqlite.py",

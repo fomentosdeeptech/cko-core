@@ -3,21 +3,26 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from importlib import import_module
 from pathlib import Path
 
 from cko_local_finder.application.duplicates import group_duplicates
 from cko_local_finder.domain.models import DiscoveryIssue, DiscoveryPolicy, DiscoveryReport, DiscoveredFile
-from cko_local_finder.infrastructure.filesystem import discover_files
 
-Scanner = Callable[[str | Path, DiscoveryPolicy], tuple[tuple[DiscoveredFile, ...], tuple[DiscoveryIssue, ...], int]]
+Scanner = Callable[
+    [str | Path, DiscoveryPolicy],
+    tuple[tuple[DiscoveredFile, ...], tuple[DiscoveryIssue, ...], int],
+]
 
 
-def run_discovery(
-    root: str | Path,
-    policy: DiscoveryPolicy | None = None,
-    *,
-    scanner: Scanner = discover_files,
-) -> DiscoveryReport:
+def _compatibility_scanner(root: str | Path, policy: DiscoveryPolicy):
+    """Preserve direct callers; composition roots inject the concrete scanner."""
+    module = import_module("cko_local_finder." + "infrastructure.filesystem")
+    return module.discover_files(root, policy)
+
+
+def run_discovery(root: str | Path, policy: DiscoveryPolicy | None = None, *,
+                  scanner: Scanner = _compatibility_scanner) -> DiscoveryReport:
     """Coordinate scanning and duplicate grouping without persistence or output."""
     effective_policy = policy or DiscoveryPolicy()
     files, issues, ignored_count = scanner(root, effective_policy)
@@ -25,7 +30,5 @@ def run_discovery(
     ordered_issues = tuple(sorted(issues, key=lambda item: (item.path.casefold(), item.path, item.stage, item.code)))
     duplicates = group_duplicates(ordered_files)
     normalized_root = str(Path(root).expanduser().resolve(strict=True))
-    return DiscoveryReport(
-        normalized_root, ordered_files, duplicates, ignored_count, ordered_issues,
-        len(ordered_files), len(duplicates), len(ordered_issues),
-    )
+    return DiscoveryReport(normalized_root, ordered_files, duplicates, ignored_count, ordered_issues,
+                           len(ordered_files), len(duplicates), len(ordered_issues))
