@@ -327,3 +327,40 @@ organização física ou virtual, OCR, busca semântica, assets, ícones, instal
 executável standalone. O uso de PySide6 está limitado a desenvolvimento; a avaliação
 de licença e a distribuição pública continuam bloqueadas. `P-018-02` permanece não
 autorizado e este incremento não autoriza o próximo.
+
+## 14. Revisão UX e polimento desktop — REV-UX-001 / INC-GUI-001C
+
+A `REV-UX-001` foi concluída e suas decisões ratificadas foram implementadas pelo
+`INC-GUI-001C`, exclusivamente como polimento de UX/UI. A janela única agora organiza
+o fluxo em biblioteca local, pasta de documentos, indexação, pesquisa, resultados e
+detalhes, sem navegação lateral e sem acrescentar capacidade de domínio. Caminhos
+completos permanecem em tooltips; nomes de pasta e biblioteca recebem prioridade.
+
+A indexação ganhou confirmação modal anterior à criação de thread/worker, com aviso
+explícito de proteção dos originais. O progresso continua indeterminado e mapeia os
+13 eventos existentes, sem percentual ou ETA inventados. A pesquisa aceita Enter,
+possui limpeza simples e filtros avançados inicialmente recolhidos, preservando os
+valores e o `SearchRequest` existente.
+
+O `QTreeWidget` foi preservado e apresenta apenas documento, tipo amigável,
+localização e conteúdo encontrado. Score, MIME completo, SHA-256, extractor,
+extractor_version e mtime_ns permanecem fora da superfície principal e disponíveis nos
+detalhes técnicos, inicialmente recolhidos. Relatórios, duplicatas, falhas e estados
+vazios usam linguagem humana derivada somente dos DTOs existentes. O splitter 3:2 e o
+mínimo de 820×600 preservam a utilização em redimensionamento.
+
+A suíte do Local Finder coletou 201 testes: `198 passed / 3 skipped / 0 failed`.
+Foram adicionadas 5 funções de teste, cobrindo 24 grupos de comportamento ratificados,
+incluindo confirmação/cancelamento, ingestão única, threading, cleanup, Enter, limpeza,
+filtros, paginação, tipos amigáveis, MIME técnico, relatórios, estados vazios,
+redimensionamento, 13 eventos e sanitização. Wheel e sdist foram gerados duas vezes;
+os wheels foram idênticos e os sdists tiveram os mesmos 90 membros e o mesmo digest
+lógico. Instalações CLI-only, GUI-extra, entry points, `pip check` e coexistência com
+`cko` e `cko-fcp` passaram.
+
+Permanecem `SDK 1.0.0`, API pública `646 / 646 / 646`, fingerprint
+`d47d3fea99b5773ec2eb97fce56d8f542211fb3104951f61b93f5265b16f9232`, Local Finder
+`0.1.0`, API raiz somente `__version__` e schema SQLite `3`. Não houve alteração de
+dependência, empacotamento, API, schema, fachada, worker, CLI ou lógica de aplicação.
+Downloads e documentos reais não foram acessados. Organização virtual ou física,
+piloto de Downloads, distribuição pública e `P-018-02` continuam não autorizados.
