@@ -364,3 +364,48 @@ Permanecem `SDK 1.0.0`, API pública `646 / 646 / 646`, fingerprint
 dependência, empacotamento, API, schema, fachada, worker, CLI ou lógica de aplicação.
 Downloads e documentos reais não foram acessados. Organização virtual ou física,
 piloto de Downloads, distribuição pública e `P-018-02` continuam não autorizados.
+
+## 15. Revisão manual encerrada e backlog de polimento — REV-GUI-002 / INC-GUI-001D
+
+A `REV-GUI-002` foi encerrada com status `PASS` sobre o ambiente sintético
+`CKO-GUI-DEMO-001`. A revisão humana confirmou seleção de pasta, confirmação anterior
+à indexação, indexação, pesquisa textual e no conteúdo, recuperação em Markdown, PDF,
+texto e DOCX, detalhes, relatórios e identificação de duplicatas. A consulta `ORION`
+retornou 7 documentos. A ingestão apresentou 10 arquivos, 9 documentos únicos, 9
+indexados, nenhuma falha e um grupo de duplicatas. Nenhum bloqueador funcional foi
+identificado, nenhum documento real foi utilizado e Downloads não foi acessado.
+
+O `INC-GUI-001D` fica documentalmente preparado como incremento futuro de polimento
+UX/UI, sem autorização de implementação. Seu backlog mínimo é:
+
+1. **Resultados:** substituir construções técnicas como “resultado(s) encontrado(s)”
+   por linguagem natural com singular e plural corretos, como “1 documento encontrado”
+   e “7 documentos encontrados”.
+2. **Localização dos documentos:** avaliar uma apresentação legível para caminhos
+   longos que preserve a informação necessária, considerando tooltip, expansão,
+   painel de detalhes ou outra solução compatível com a arquitetura atual.
+3. **Destaque do termo pesquisado:** avaliar destaque visual do termo consultado dentro
+   de “Conteúdo encontrado”, incluindo casos como `ORION`.
+4. **Controles visuais não explicados:** identificar tecnicamente a origem e a finalidade
+   dos pequenos controles representados por triângulos ou setas e classificar cada um
+   como funcional e necessário, funcional porém pouco compreensível, artefato visual ou
+   candidato à remoção/substituição.
+5. **Hierarquia visual:** avaliar espaçamentos, proporções, largura das colunas,
+   legibilidade, prioridade das ações principais, comportamento maximizado e
+   consistência terminológica.
+6. **Terminologia:** preservar linguagem compreensível para usuário não técnico e a
+   direção adotada em “Biblioteca local”, “Pasta de documentos”, “Indexar pasta”,
+   “Pesquisar na biblioteca”, “Documento”, “Tipo”, “Localização”, “Conteúdo
+   encontrado”, “Detalhes”, “Indexação”, “Problemas” e “Duplicatas”.
+
+O incremento deverá manter fora de escopo alterações de CLI, API, schema, mecanismo de
+busca, indexação e detecção de duplicatas. Não há autorização para organização física
+ou virtual, acesso a documentos reais ou Downloads, piloto real, distribuição pública,
+incremento posterior ou `P-018-02`.
+
+```text
+REV_GUI_002_STATUS: PASS
+INC_GUI_001D_STATUS: DOCUMENTALLY_PREPARED / NOT_IMPLEMENTED / NOT_AUTHORIZED
+NEXT_INCREMENT_AUTHORIZED: NO
+P_018_02_AUTHORIZED: NO
+```
